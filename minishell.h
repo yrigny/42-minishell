@@ -38,11 +38,6 @@ typedef enum e_token_type
     TOKEN_ENV_VAR,      // '$'
 }   t_token_type;
 
-// typedef struct s_env
-// {
-
-// }   t_env;
-
 typedef struct s_token
 {
     t_token_type    type;
@@ -54,10 +49,20 @@ typedef struct s_proc
 {
     char    **cmd_arr;
     char    *fullpath;
+    char    *redir_in;
+    t_list  *redir_heredoc;
+    t_list  *redir_out;
+    t_list  *redir_append;
     int     fd_in;
     int     fd_out;
-    int     pipe[2];
+    // int  pipe[2];
 }   t_proc;
+
+typedef struct s_shell
+{
+    t_list  *exec_list;
+    t_list  *pipe_list;
+}   t_shell;
 
 /* syntax check */
 int		ft_isspace(char c);
@@ -84,6 +89,15 @@ void    print_tokens(t_token *tokens);
 void	free_tokens(t_token **tokens);
 
 /* parse tokens */
+t_list *parse_tokens(t_token **tokens);
+t_list  *gen_exec_list(t_token *tokens);
+void    move_to_next_cmd(t_token **tokens);
+t_list  *parse_cmd(t_token *tokens);
+void    print_cmd_arr(char **cmd_arr);
+void    print_redir_out(t_list *outfiles);
+void    parse_cmd_and_arg(t_token *start, t_proc *cmd, t_token **tokens);
+void    parse_redir_in(char *infile, t_proc *cmd, t_token **tokens);
+void    parse_redir_out(char *outfile, t_proc *cmd, t_token **tokens);
 t_list  *new_pipe_node(t_token *head_of_left_cmd, t_token *head_of_right_cmd);
 
 /* main process */

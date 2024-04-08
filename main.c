@@ -97,7 +97,7 @@ int		main(void)
 	char	*line;
 	// int		status;
 	t_token	*tokens;
-	// t_list	*exec_list;
+	t_list	*exec_list;
 
 	while (1)
 	{
@@ -114,7 +114,8 @@ int		main(void)
 		printf("line of len %ld: %s\n", strlen(line), line);
 		tokens = check_syntax_and_tokenize(line);
 		print_tokens(tokens);
-		free_tokens(&tokens);
+		exec_list = parse_tokens(&tokens);
+		// free_tokens(&tokens);
 		// if (!tokens)
 		// 	status = 258;
 		// if (!status)
