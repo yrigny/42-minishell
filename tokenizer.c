@@ -115,5 +115,6 @@ t_token	*tokenize(char *line)
 		if (!tokens)
 			break ;
 	}
+	// print_tokens(tokens);
 	return (tokens);
 }

@@ -38,141 +38,130 @@
 
 // Ex: < in1 in2 > out1 > out2 cmd1 | cmd2
 
-void    parse_redir_in(char *infile, t_proc *cmd, t_token **tokens)
+int parse_redir_in(char *infile, t_proc *cmd, t_token **tokens)
 {
     if (cmd->redir_in)
         free(cmd->redir_in);
     cmd->redir_in = ft_strdup(infile);
+    if (!cmd->redir_in)
+        return (0);
     *tokens = (*tokens)->next->next;
+    return (1);
 }
 
-void    parse_redir_out(char *outfile, t_proc *cmd, t_token **tokens)
+int parse_redir_out(char *outfile, t_proc *cmd, t_token **tokens)
 {
     char    *new_file;
     t_list  *new_node;
 
     new_file = ft_strdup(outfile);
-    if (new_file)
-        new_node = ft_lstnew(new_file);
-    if (new_node)
-        ft_lstadd_back(cmd->fd_out, new_node);
+    if (!new_file)
+    {
+        // free cmd->redir_out
+        return (0);
+    }
+    new_node = ft_lstnew(new_file);
+    if (!new_node)
+    {
+        // free cmd->redir_out
+        return (0);
+    }
+    ft_lstadd_back(&cmd->redir_out, new_node);
     *tokens = (*tokens)->next->next;
+    return (1);
 }
 
-// to be modified
-void    parse_cmd_and_arg(t_token *start, t_proc *cmd, t_token **tokens)
+int parse_cmd_and_arg(t_list **cmd_arg, t_token **tokens)
 {
-    int wordcount;
-    char    **ptr;
+    char    *new_word;
+    t_list  *new_node;
 
-    wordcount = 0;
-    while (start && start->type == TOKEN_WORD)
+    new_word = ft_strdup((*tokens)->value);
+    if (!new_word)
+        return (0);
+    new_node = ft_lstnew(new_word);
+    if (!new_node)
     {
-        wordcount++;
-        start = start->next;
+        free(new_word);
+        return (0);
     }
+    ft_lstadd_back(cmd_arg, new_node);
+    *tokens = (*tokens)->next;
+    return (1);
+}
+
+int reform_as_cmd_arr(t_list *cmd_arg, t_proc *cmd)
+{
+    char    **ptr;
+    int     wordcount;
+
+    wordcount = ft_lstsize(cmd_arg);
+    if (!wordcount)
+        return (0);
     cmd->cmd_arr = malloc(sizeof(char *) * (wordcount + 1));
+    if (!(cmd->cmd_arr))
+        return (0);
     ptr = cmd->cmd_arr;
-    start = *tokens;
-    while (start && start->type == TOKEN_WORD)
+    while (cmd_arg)
     {
-        *ptr = ft_strdup(start->value);
-        // printf("%s\n", *ptr);
-        start = start->next;
+        *ptr = ft_strdup((char *)(cmd_arg->content));
+        if (!(*ptr))
+            free_cmd_arr(&cmd->cmd_arr);
+        cmd_arg = cmd_arg->next;
         ptr++;
     }
     *ptr = NULL;
-    *tokens = start;
+    return (1);
 }
 
-void    print_cmd_arr(char **cmd_arr)
-{
-    printf("cmd_arr:\n");
-    while (*cmd_arr)
-    {
-        printf("%s\n", *cmd_arr);
-        cmd_arr++;
-    }
-}
-
-void    print_redir_outs(t_list *outfiles)
-{
-    while (outfiles->next)
-    {
-        printf("silent outfile: %s\n", outfiles->content);
-        outfiles = outfiles->next;
-    }
-    printf("active outfile: %s\n", outfiles->content);
-}
-
-t_list  *parse_cmd(t_token *tokens)
+t_list  *parse_cmd(t_token **tokens)
 {
     t_proc  *new_cmd;
+    t_list  *cmd_arg;
+    int     malloc_ok;
 
-    new_cmd = malloc(sizeof(t_proc));
-    if (!new_cmd)
-        return (NULL);
-    new_cmd->cmd_arr = NULL;
-    new_cmd->fullpath = NULL;
-    new_cmd->redir_in = NULL;
-    new_cmd->redir_heredoc = NULL;
-    new_cmd->redir_out = NULL;
-    new_cmd->redir_append = NULL;
-    while (tokens)
+    cmd_arg = NULL;
+    malloc_ok = new_proc_node(&new_cmd);
+    while (malloc_ok && *tokens && (*tokens)->type != TOKEN_PIPE)
     {
-        if (tokens->type == TOKEN_REDIR_IN)
-            parse_redir_in(tokens->next->value, new_cmd, &tokens);
-        // else if (tokens->type == TOKEN_REDIR_HEREDOC)
+        if (malloc_ok && (*tokens)->type == TOKEN_REDIR_IN)
+            malloc_ok = parse_redir_in((*tokens)->next->value, new_cmd, tokens);
+        // if (malloc_ok && tokens->type == TOKEN_REDIR_HEREDOC)
         //     parse_redir_heredoc(tokens->next, new_cmd, &tokens);
-        else if (tokens->type == TOKEN_REDIR_OUT)
-            parse_redir_out(tokens->next->value, new_cmd, &tokens);
-        // else if (tokens->type == TOKEN_REDIR_APPEND)
+        else if (malloc_ok && (*tokens)->type == TOKEN_REDIR_OUT)
+            malloc_ok = parse_redir_out((*tokens)->next->value, new_cmd, tokens);
+        // if (malloc_ok && tokens->type == TOKEN_REDIR_APPEND)
         //     parse_redir_append(tokens->next, new_cmd, &tokens);
-        else
-            parse_cmd_and_arg(tokens, new_cmd, &tokens);
+        else if (malloc_ok && (*tokens)->type == TOKEN_WORD)
+            malloc_ok = parse_cmd_and_arg(&cmd_arg, tokens);
     }
-    print_cmd_arr(new_cmd->cmd_arr);
-    printf("infile: %s\n", new_cmd->redir_in);
-    print_redir_outs(new_cmd->redir_out);
+    if (malloc_ok)
+        malloc_ok = reform_as_cmd_arr(cmd_arg, new_cmd);
+    free_cmd_arg_list(&cmd_arg); // never skip this
+    if (!malloc_ok)
+        return (NULL);
     return (ft_lstnew(new_cmd));
 }
 
-void    move_to_next_cmd(t_token **tokens)
-{
-    while (*tokens)
-    {
-        if (*tokens == NULL || (*tokens)->type == TOKEN_PIPE)
-            break ;
-        *tokens = (*tokens)->next;
-    }
-    if (*tokens && (*tokens)->type == TOKEN_PIPE)
-        *tokens = (*tokens)->next;
-}
-
-t_list  *gen_exec_list(t_token *tokens)
+t_list  *gen_exec_list(t_token **tokens)
 {
     t_list  *exec_list;
     t_list  *exec_node;
 
     exec_list = NULL;
-    if (!tokens)
+    if (!(*tokens))
         return (NULL);
-    while (tokens)
+    while (*tokens)
     {
-        exec_node = parse_cmd(tokens);
+        exec_node = parse_cmd(tokens); // overwrite ?
+        if (!exec_node)
+            return (NULL);
         ft_lstadd_back(&exec_list, exec_node);
-        move_to_next_cmd(&tokens);
+        if (*tokens && (*tokens)->type == TOKEN_PIPE)
+            *tokens = (*tokens)->next;
     }
     return (exec_list);
 }
-
-// void    print_exec_list(exec_list)
-// {
-//     t_proc  *cmd;
-
-//     cmd = exec_list->content;
-//     while ()
-// }
 
 t_list *parse_tokens(t_token **tokens)
 {
@@ -180,7 +169,12 @@ t_list *parse_tokens(t_token **tokens)
     t_list  *exec_list;
     t_token *head;
 
-    exec_list = gen_exec_list(*tokens);
+    exec_list = gen_exec_list(tokens);
+    if (!exec_list)
+    {
+        ft_putstr_fd("Token-parsing failed - malloc error.", 2);
+        return (NULL);
+    }
     // result.pipe_list = gen_pipe_list(*tokens);
     head = *tokens;
     while (*tokens)
@@ -189,7 +183,7 @@ t_list *parse_tokens(t_token **tokens)
         (*tokens) = (*tokens)->next;
     }
     free(head);
-    // print_exec_list(exec_list);
+    print_exec_list(exec_list);
     return (exec_list);
 }
 

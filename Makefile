@@ -9,11 +9,13 @@ LFLAGS 		= -L$(FT_DIR) -lft -lreadline
 CFILES		= main.c \
 			syntax_checker.c syntax_checker_utils.c \
 			tokenizer.c tokenizer_utils.c \
-			parse_tokens.c
+			token_parser.c token_parser_utils.c
 
 OFILES		= $(CFILES:.c=.o)
 
 NAME		= minishell
+
+GNL			= 0
 
 GREEN=\033[0;32m
 YELLOW=\033[0;33m
@@ -30,7 +32,7 @@ $(NAME): $(OFILES)
 	@echo "$(GREEN)Compiled $(NAME) ✅ $(NC)"
 
 $(OFILES): %.o: %.c minishell.h
-	@$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -c $< -o $@ -D GNL=$(GNL)
 
 clean:
 	@cd ./libft && make clean > /dev/null
