@@ -36,42 +36,27 @@
 //     return (node_on_pipe_list);
 // }
 
-// Ex: < in1 in2 > out1 > out2 cmd1 | cmd2
-
-int parse_redir_in(char *infile, t_proc *cmd, t_token **tokens)
+bool    parse_redir(char *file, t_list **redir_list, t_token **tokens)
 {
-    if (cmd->redir_in)
-        free(cmd->redir_in);
-    cmd->redir_in = ft_strdup(infile);
-    if (!cmd->redir_in)
-        return (0);
-    *tokens = (*tokens)->next->next;
-    return (1);
-}
-
-int parse_redir_out(char *outfile, t_proc *cmd, t_token **tokens)
-{
-    char    *new_file;
+    t_token *new_file;
     t_list  *new_node;
 
-    new_file = ft_strdup(outfile);
+    new_file = malloc(sizeof(t_token));
     if (!new_file)
-    {
-        // free cmd->redir_out
         return (0);
-    }
+    new_file->type = (*tokens)->type;
+    new_file->value = ft_strdup(file);
+    if (!(new_file->value))
+        return (0);
     new_node = ft_lstnew(new_file);
     if (!new_node)
-    {
-        // free cmd->redir_out
         return (0);
-    }
-    ft_lstadd_back(&cmd->redir_out, new_node);
+    ft_lstadd_back(redir_list, new_node);
     *tokens = (*tokens)->next->next;
     return (1);
 }
 
-int parse_cmd_and_arg(t_list **cmd_arg, t_token **tokens)
+bool    parse_cmd_and_arg(t_list **cmd_arg, t_token **tokens)
 {
     char    *new_word;
     t_list  *new_node;
@@ -90,56 +75,26 @@ int parse_cmd_and_arg(t_list **cmd_arg, t_token **tokens)
     return (1);
 }
 
-int reform_as_cmd_arr(t_list *cmd_arg, t_proc *cmd)
-{
-    char    **ptr;
-    int     wordcount;
-
-    wordcount = ft_lstsize(cmd_arg);
-    if (!wordcount)
-        return (0);
-    cmd->cmd_arr = malloc(sizeof(char *) * (wordcount + 1));
-    if (!(cmd->cmd_arr))
-        return (0);
-    ptr = cmd->cmd_arr;
-    while (cmd_arg)
-    {
-        *ptr = ft_strdup((char *)(cmd_arg->content));
-        if (!(*ptr))
-            free_cmd_arr(&cmd->cmd_arr);
-        cmd_arg = cmd_arg->next;
-        ptr++;
-    }
-    *ptr = NULL;
-    return (1);
-}
-
 t_list  *parse_cmd(t_token **tokens)
 {
     t_proc  *new_cmd;
     t_list  *cmd_arg;
-    int     malloc_ok;
 
     cmd_arg = NULL;
-    malloc_ok = new_proc_node(&new_cmd);
-    while (malloc_ok && *tokens && (*tokens)->type != TOKEN_PIPE)
-    {
-        if (malloc_ok && (*tokens)->type == TOKEN_REDIR_IN)
-            malloc_ok = parse_redir_in((*tokens)->next->value, new_cmd, tokens);
-        // if (malloc_ok && tokens->type == TOKEN_REDIR_HEREDOC)
-        //     parse_redir_heredoc(tokens->next, new_cmd, &tokens);
-        else if (malloc_ok && (*tokens)->type == TOKEN_REDIR_OUT)
-            malloc_ok = parse_redir_out((*tokens)->next->value, new_cmd, tokens);
-        // if (malloc_ok && tokens->type == TOKEN_REDIR_APPEND)
-        //     parse_redir_append(tokens->next, new_cmd, &tokens);
-        else if (malloc_ok && (*tokens)->type == TOKEN_WORD)
-            malloc_ok = parse_cmd_and_arg(&cmd_arg, tokens);
-    }
-    if (malloc_ok)
-        malloc_ok = reform_as_cmd_arr(cmd_arg, new_cmd);
-    free_cmd_arg_list(&cmd_arg); // never skip this
-    if (!malloc_ok)
+    new_cmd = ft_calloc(1, sizeof(t_proc));
+    if (!new_cmd)
         return (NULL);
+    while (*tokens && (*tokens)->type != TOKEN_PIPE)
+    {
+        if ((*tokens)->type == TOKEN_REDIR_IN || (*tokens)->type == TOKEN_REDIR_HEREDOC)
+            parse_redir((*tokens)->next->value, &new_cmd->redir_in, tokens);
+        else if ((*tokens)->type == TOKEN_REDIR_OUT || (*tokens)->type == TOKEN_REDIR_APPEND)
+            parse_redir((*tokens)->next->value, &new_cmd->redir_out, tokens);
+        else if ((*tokens)->type == TOKEN_WORD)
+            parse_cmd_and_arg(&cmd_arg, tokens);
+    }
+    reform_as_cmd_arr(cmd_arg, new_cmd);
+    free_cmd_arg_list(&cmd_arg); // never skip this
     return (ft_lstnew(new_cmd));
 }
 
@@ -186,30 +141,3 @@ t_list *parse_tokens(t_token **tokens)
     print_exec_list(exec_list);
     return (exec_list);
 }
-
-// t_list  *parse_tokens(t_token **tokens)
-// {
-//     t_list  *exec_list;
-//     t_pipe  *pipe_node;
-//     t_token *token_mark;
-
-//     exec_list = NULL;
-//     pipe_node = NULL;
-//     token_mark = *tokens; // head of some cmd
-//     while (*tokens && (*tokens)->next)
-//     {
-//         if ((*tokens)->next->type == TOKEN_PIPE)
-//         // create pipe node
-//         {
-//             *tokens = (*tokens)->next; // step on the pipe
-//             // send the head of left cmd and the head of right cmd to form pipe
-//             pipe_node = new_pipe_node(token_mark, (*tokens)->next);
-//             ft_lstadd_back(&pipe_list, pipe_node);
-//             token_mark = (*tokens)->next;
-//         }
-//         *tokens = (*tokens)->next;
-//     }
-//     if (!*tokens && !pipe_node) // pipe not found
-//         exec_list = parse_cmd(token_mark);
-//     return (exec_list);
-// }

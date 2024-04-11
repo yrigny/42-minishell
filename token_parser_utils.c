@@ -12,20 +12,43 @@
 
 #include "minishell.h"
 
-int new_proc_node(t_proc **ptr)
-{ 
-    *ptr = malloc(sizeof(t_proc));
-    if (!(*ptr))
+bool    reform_as_cmd_arr(t_list *cmd_arg, t_proc *cmd)
+{
+    char    **ptr;
+    int     wordcount;
+
+    wordcount = ft_lstsize(cmd_arg);
+    if (!wordcount)
         return (0);
-    (*ptr)->cmd_arr = NULL;
-    (*ptr)->fullpath = NULL;
-    (*ptr)->redir_in = NULL;
-    (*ptr)->redir_heredoc = NULL;
-    (*ptr)->redir_out = NULL;
-    (*ptr)->redir_append = NULL;
-    (*ptr)->fd_in = 0;
-    (*ptr)->fd_out = 0;
+    cmd->cmd_arr = malloc(sizeof(char *) * (wordcount + 1));
+    if (!(cmd->cmd_arr))
+        return (0);
+    ptr = cmd->cmd_arr;
+    while (cmd_arg)
+    {
+        *ptr = ft_strdup((char *)(cmd_arg->content));
+        if (!(*ptr))
+            free_cmd_arr(&cmd->cmd_arr);
+        cmd_arg = cmd_arg->next;
+        ptr++;
+    }
+    *ptr = NULL;
     return (1);
+}
+
+void    free_cmd_arr(char ***p_cmd_arr)
+{
+    char    **head;
+
+    head = *p_cmd_arr;
+    if (!head)
+        return ;
+    while (*head)
+    {
+        free(*head);
+        head++;
+    }
+    free(*p_cmd_arr);
 }
 
 void    free_cmd_arg_list(t_list **cmd_arg)
@@ -44,45 +67,45 @@ void    free_cmd_arg_list(t_list **cmd_arg)
 void    print_exec_list(t_list *exec_list)
 {
     t_proc  *exec_node;
+    t_list  *infiles;
     t_list  *outfiles;
     char    **str_arr;
 
     while (exec_list)
     {
+        printf("----------------------\n");
         exec_node = (t_proc *)(exec_list->content);
-        // print infile
-        printf("infile: %s\n", exec_node->redir_in);
+        // print infile(s)
+        infiles = exec_node->redir_in;
+        while (infiles && infiles->next)
+        {
+            printf("silent infile: %s\n", ((t_token *)infiles->content)->value);
+            infiles = infiles->next;
+        }
+        if (infiles)
+            printf("active infile: %s\n", ((t_token *)infiles->content)->value);
         // print outfile(s)
         outfiles = exec_node->redir_out;
         while (outfiles && outfiles->next)
         {
-            printf("silent outfile: %s\n", (char *)(outfiles->content));
+            printf("silent outfile: %s\n", ((t_token *)outfiles->content)->value);
             outfiles = outfiles->next;
         }
         if (outfiles)
-            printf("active outfile: %s\n", (char *)(outfiles->content));
+            printf("active outfile: %s\n", ((t_token *)outfiles->content)->value);
         // print cmd with args
         str_arr = exec_node->cmd_arr;
+        if (*str_arr)
+        {
+            printf("cmd: %s\n", *str_arr);
+            str_arr++;
+        }
         while (*str_arr)
         {
-            printf("%s\n", *str_arr);
+            printf("arg: %s\n", *str_arr);
             str_arr++;
         }
         exec_list = exec_list->next;
+        printf("----------------------\n");
     }
-}
-
-void    free_cmd_arr(char ***p_cmd_arr)
-{
-    char    **head;
-
-    head = *p_cmd_arr;
-    if (!head)
-        return ;
-    while (*head)
-    {
-        free(*head);
-        head++;
-    }
-    free(*p_cmd_arr);
 }
