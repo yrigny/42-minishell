@@ -36,22 +36,28 @@
 //     return (node_on_pipe_list);
 // }
 
-bool    parse_redir(char *file, t_list **redir_list, t_token **tokens)
+bool    parse_redir(char *file, t_token **redir_list, t_token **tokens)
 {
     t_token *new_file;
-    t_list  *new_node;
+    t_token *tmp;
 
     new_file = malloc(sizeof(t_token));
     if (!new_file)
         return (0);
+    new_file->next = NULL;
     new_file->type = (*tokens)->type;
     new_file->value = ft_strdup(file);
     if (!(new_file->value))
         return (0);
-    new_node = ft_lstnew(new_file);
-    if (!new_node)
-        return (0);
-    ft_lstadd_back(redir_list, new_node);
+    if (!(*redir_list))
+        *redir_list = new_file;
+    else
+    {
+        tmp = *redir_list;
+        while (tmp->next)
+            tmp = tmp->next;
+        tmp->next = new_file;
+    }
     *tokens = (*tokens)->next->next;
     return (1);
 }
@@ -122,7 +128,6 @@ t_list *parse_tokens(t_token **tokens)
 {
     // t_shell result;
     t_list  *exec_list;
-    t_token *head;
 
     exec_list = gen_exec_list(tokens);
     if (!exec_list)
@@ -131,13 +136,8 @@ t_list *parse_tokens(t_token **tokens)
         return (NULL);
     }
     // result.pipe_list = gen_pipe_list(*tokens);
-    head = *tokens;
-    while (*tokens)
-    {
-        free((*tokens)->value);
-        (*tokens) = (*tokens)->next;
-    }
-    free(head);
+    free_tokens(tokens); // doesn't work
+    printf("%p\n", *tokens);
     print_exec_list(exec_list);
     return (exec_list);
 }

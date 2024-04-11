@@ -67,8 +67,8 @@ void    free_cmd_arg_list(t_list **cmd_arg)
 void    print_exec_list(t_list *exec_list)
 {
     t_proc  *exec_node;
-    t_list  *infiles;
-    t_list  *outfiles;
+    t_token *infiles;
+    t_token *outfiles;
     char    **str_arr;
 
     while (exec_list)
@@ -79,20 +79,20 @@ void    print_exec_list(t_list *exec_list)
         infiles = exec_node->redir_in;
         while (infiles && infiles->next)
         {
-            printf("silent infile: %s\n", ((t_token *)infiles->content)->value);
+            printf("silent infile: %s\n", infiles->value);
             infiles = infiles->next;
         }
         if (infiles)
-            printf("active infile: %s\n", ((t_token *)infiles->content)->value);
+            printf("active infile: %s\n", infiles->value);
         // print outfile(s)
         outfiles = exec_node->redir_out;
         while (outfiles && outfiles->next)
         {
-            printf("silent outfile: %s\n", ((t_token *)outfiles->content)->value);
+            printf("silent outfile: %s\n", outfiles->value);
             outfiles = outfiles->next;
         }
         if (outfiles)
-            printf("active outfile: %s\n", ((t_token *)outfiles->content)->value);
+            printf("active outfile: %s\n", outfiles->value);
         // print cmd with args
         str_arr = exec_node->cmd_arr;
         if (*str_arr)
@@ -107,5 +107,21 @@ void    print_exec_list(t_list *exec_list)
         }
         exec_list = exec_list->next;
         printf("----------------------\n");
+    }
+}
+
+void    free_exec_list(t_list **exec_list)
+{
+    t_list  *next_exec_node;
+
+    while (*exec_list)
+    {
+        next_exec_node = (*exec_list)->next;
+        free_cmd_arr(&((t_proc *)(*exec_list)->content)->cmd_arr);
+        free_tokens(&((t_proc *)(*exec_list)->content)->redir_in);
+        free_tokens(&((t_proc *)(*exec_list)->content)->redir_out);
+        free((*exec_list)->content);
+        free(*exec_list);
+        *exec_list = next_exec_node;
     }
 }
