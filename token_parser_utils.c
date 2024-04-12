@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-bool    reform_as_cmd_arr(t_list *cmd_arg, t_proc *cmd)
+bool    reform_as_cmd_arr(t_list *cmd_arg, t_cmd *cmd)
 {
     char    **ptr;
     int     wordcount;
@@ -28,7 +28,7 @@ bool    reform_as_cmd_arr(t_list *cmd_arg, t_proc *cmd)
     {
         *ptr = ft_strdup((char *)(cmd_arg->content));
         if (!(*ptr))
-            free_cmd_arr(&cmd->cmd_arr);
+            free_str_arr(&cmd->cmd_arr);
         cmd_arg = cmd_arg->next;
         ptr++;
     }
@@ -36,11 +36,11 @@ bool    reform_as_cmd_arr(t_list *cmd_arg, t_proc *cmd)
     return (1);
 }
 
-void    free_cmd_arr(char ***p_cmd_arr)
+void    free_str_arr(char ***p_str_arr)
 {
     char    **head;
 
-    head = *p_cmd_arr;
+    head = *p_str_arr;
     if (!head)
         return ;
     while (*head)
@@ -48,7 +48,7 @@ void    free_cmd_arr(char ***p_cmd_arr)
         free(*head);
         head++;
     }
-    free(*p_cmd_arr);
+    free(*p_str_arr);
 }
 
 void    free_cmd_arg_list(t_list **cmd_arg)
@@ -64,19 +64,19 @@ void    free_cmd_arg_list(t_list **cmd_arg)
     }
 }
 
-void    print_exec_list(t_list *exec_list)
+void    print_cmd_list(t_list *cmd_list)
 {
-    t_proc  *exec_node;
+    t_cmd   *cmd_node;
     t_token *infiles;
     t_token *outfiles;
     char    **str_arr;
 
-    while (exec_list)
+    while (cmd_list)
     {
         printf("----------------------\n");
-        exec_node = (t_proc *)(exec_list->content);
+        cmd_node = (t_cmd *)(cmd_list->content);
         // print infile(s)
-        infiles = exec_node->redir_in;
+        infiles = cmd_node->redir_in;
         while (infiles && infiles->next)
         {
             printf("silent infile: %s\n", infiles->value);
@@ -85,7 +85,7 @@ void    print_exec_list(t_list *exec_list)
         if (infiles)
             printf("active infile: %s\n", infiles->value);
         // print outfile(s)
-        outfiles = exec_node->redir_out;
+        outfiles = cmd_node->redir_out;
         while (outfiles && outfiles->next)
         {
             printf("silent outfile: %s\n", outfiles->value);
@@ -94,7 +94,7 @@ void    print_exec_list(t_list *exec_list)
         if (outfiles)
             printf("active outfile: %s\n", outfiles->value);
         // print cmd with args
-        str_arr = exec_node->cmd_arr;
+        str_arr = cmd_node->cmd_arr;
         if (*str_arr)
         {
             printf("cmd: %s\n", *str_arr);
@@ -105,23 +105,27 @@ void    print_exec_list(t_list *exec_list)
             printf("arg: %s\n", *str_arr);
             str_arr++;
         }
-        exec_list = exec_list->next;
+        cmd_list = cmd_list->next;
         printf("----------------------\n");
     }
 }
 
-void    free_exec_list(t_list **exec_list)
+void    free_cmd_list(void)
 {
-    t_list  *next_exec_node;
+    t_ms    *ms;
+    t_list  **cmd_list;
+    t_list  *next_cmd_node;
 
-    while (*exec_list)
+    ms = get_ms();
+    cmd_list = &ms->cmds;
+    while (*cmd_list)
     {
-        next_exec_node = (*exec_list)->next;
-        free_cmd_arr(&((t_proc *)(*exec_list)->content)->cmd_arr);
-        free_tokens(&((t_proc *)(*exec_list)->content)->redir_in);
-        free_tokens(&((t_proc *)(*exec_list)->content)->redir_out);
-        free((*exec_list)->content);
-        free(*exec_list);
-        *exec_list = next_exec_node;
+        next_cmd_node = (*cmd_list)->next;
+        free_str_arr(&((t_cmd *)(*cmd_list)->content)->cmd_arr);
+        free_tokens(&((t_cmd *)(*cmd_list)->content)->redir_in);
+        free_tokens(&((t_cmd *)(*cmd_list)->content)->redir_out);
+        free((*cmd_list)->content);
+        free(*cmd_list);
+        *cmd_list = next_cmd_node;
     }
 }

@@ -12,30 +12,6 @@
 
 #include "minishell.h"
 
-// typedef struct s_pipe
-// {
-//     int     fd_pair[2];
-//     int     pid;
-//     t_proc  *process_l;
-//     t_proc  *process_r;
-// }   t_pipe;
-
-// t_list  *new_pipe_node(t_token *head_of_left_cmd, t_token *head_of_right_cmd)
-// {
-//     t_pipe  *new;
-//     t_list  node_on_list;
-
-//     new = malloc(sizeof(t_pipe));
-//     if (!new)
-//         return (NULL);
-//     new->process_l = parse_cmd(head_of_left_cmd);
-//     new->process_r = parse_cmd(head_of_right_cmd);
-//     if (!new->process_l || !new->process_r)
-//         return (NULL);
-//     node_on_pipe_list = ft_lstnew(new);
-//     return (node_on_pipe_list);
-// }
-
 bool    parse_redir(char *file, t_token **redir_list, t_token **tokens)
 {
     t_token *new_file;
@@ -83,11 +59,11 @@ bool    parse_cmd_and_arg(t_list **cmd_arg, t_token **tokens)
 
 t_list  *parse_cmd(t_token **tokens)
 {
-    t_proc  *new_cmd;
+    t_cmd   *new_cmd;
     t_list  *cmd_arg;
 
     cmd_arg = NULL;
-    new_cmd = ft_calloc(1, sizeof(t_proc));
+    new_cmd = ft_calloc(1, sizeof(t_cmd));
     if (!new_cmd)
         return (NULL);
     while (*tokens && (*tokens)->type != TOKEN_PIPE)
@@ -104,40 +80,38 @@ t_list  *parse_cmd(t_token **tokens)
     return (ft_lstnew(new_cmd));
 }
 
-t_list  *gen_exec_list(t_token *tokens)
+t_list  *gen_cmd_list(t_token *tokens)
 {
-    t_list  *exec_list;
-    t_list  *exec_node;
+    t_list  *cmd_list;
+    t_list  *cmd_node;
 
-    exec_list = NULL;
+    cmd_list = NULL;
     if (!tokens)
         return (NULL);
     while (tokens)
     {
-        exec_node = parse_cmd(&tokens); // overwrite ?
-        if (!exec_node)
+        cmd_node = parse_cmd(&tokens);
+        if (!cmd_node)
             return (NULL);
-        ft_lstadd_back(&exec_list, exec_node);
+        ft_lstadd_back(&cmd_list, cmd_node);
         if (tokens && tokens->type == TOKEN_PIPE)
             tokens = tokens->next;
     }
-    return (exec_list);
+    return (cmd_list);
 }
 
-t_list *parse_tokens(t_token *tokens)
+bool    parse_tokens(t_token *tokens)
 {
-    // t_shell result;
-    t_list  *exec_list;
+    t_ms    *ms;
 
-    exec_list = gen_exec_list(tokens);
-    if (!exec_list)
+    ms = get_ms();
+    ms->cmds = gen_cmd_list(tokens);
+    if (!ms->cmds)
     {
         ft_putstr_fd("Token-parsing failed - malloc error.", 2);
-        return (NULL);
+        return (0);
     }
-    // result.pipe_list = gen_pipe_list(*tokens);
-    free_tokens(&tokens); // doesn't work
-    // printf("%p\n", *tokens);
-    print_exec_list(exec_list);
-    return (exec_list);
+    free_tokens(&tokens);
+    print_cmd_list(ms->cmds);
+    return (1);
 }

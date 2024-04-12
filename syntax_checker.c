@@ -12,32 +12,27 @@
 
 #include "minishell.h"
 
-int		syntax_error(char *line)
+t_token	*check_syntax_and_tokenize(char *line)
 {
-	if (has_unclosed_quote(line))
+	char	*trimmed_line;
+	t_token	*tokens;
+
+	trimmed_line = trim_line(line);
+	tokens = NULL;
+	free(line);
+	if (!trimmed_line)
+		return (NULL);
+	if (syntax_error(trimmed_line))
 	{
-		ft_putstr_fd("Syntax error: unclosed quote\n", STDERR_FILENO);
-		return (1);
+		free(trimmed_line);
+		return (NULL);
 	}
-	if (has_invalid_redir(line))
-	{
-		ft_putstr_fd("Syntax error: invalid redirection\n", STDERR_FILENO);
-		return (1);
-	}
-	if (has_logical_oparator(line))
-	{
-		ft_putstr_fd("Syntax error: && and || not supported\n", STDERR_FILENO);
-		return (1);
-	}
-	if (has_misplaced_oparator(line))
-	{
-		ft_putstr_fd("Syntax error: misplaced oparator\n", STDERR_FILENO);
-		return (1);
-	}
-	return (0);
+	tokens = tokenize(trimmed_line);
+	free(trimmed_line);
+	return (tokens);
 }
 
-int		has_unclosed_quote(char *line)
+bool	has_unclosed_quote(char *line)
 {
 	char	quote_type;
 
@@ -60,7 +55,7 @@ int		has_unclosed_quote(char *line)
 	return (0);
 }
 
-int		has_invalid_redir(char *line)
+bool	has_invalid_redir(char *line)
 {
 	char	redir_type;
 
@@ -89,7 +84,7 @@ int		has_invalid_redir(char *line)
 	return (0);
 }
 
-int		has_misplaced_oparator(char *line)
+bool	has_misplaced_oparator(char *line)
 {
 	int	single_quote_open;
 	int	double_quote_open;
@@ -117,7 +112,7 @@ int		has_misplaced_oparator(char *line)
 	return (cmd_is_expected);
 }
 
-int		has_logical_oparator(char *line)
+bool	has_logical_oparator(char *line)
 {
 	int	single_quote_open;
 	int	double_quote_open;

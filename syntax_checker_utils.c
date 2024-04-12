@@ -12,10 +12,28 @@
 
 #include "minishell.h"
 
-int		ft_isspace(char c)
+bool	syntax_error(char *line)
 {
-	if (c == ' ' || (c >= '\t' && c <= '\r'))
+	if (has_unclosed_quote(line))
+	{
+		ft_putstr_fd("Syntax error: unclosed quote\n", STDERR_FILENO);
 		return (1);
+	}
+	if (has_invalid_redir(line))
+	{
+		ft_putstr_fd("Syntax error: invalid redirection\n", STDERR_FILENO);
+		return (1);
+	}
+	if (has_logical_oparator(line))
+	{
+		ft_putstr_fd("Syntax error: && and || not supported\n", STDERR_FILENO);
+		return (1);
+	}
+	if (has_misplaced_oparator(line))
+	{
+		ft_putstr_fd("Syntax error: misplaced oparator\n", STDERR_FILENO);
+		return (1);
+	}
 	return (0);
 }
 

@@ -6,7 +6,7 @@ FT_DIR		= ./libft
 
 LFLAGS 		= -L$(FT_DIR) -lft -lreadline
 
-CFILES		= main.c \
+CFILES		= main.c minishell.c minishell_utils.c \
 			syntax_checker.c syntax_checker_utils.c \
 			tokenizer.c tokenizer_utils.c \
 			token_parser.c token_parser_utils.c

@@ -36,7 +36,7 @@ t_token_type    get_type(char c)
         return (TOKEN_WORD);
 }
 
-int type_diff(char c1, char c2)
+bool    type_diff(char c1, char c2)
 {
     if (get_type(c1) != get_type(c2))
         return (1);
