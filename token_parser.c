@@ -104,27 +104,27 @@ t_list  *parse_cmd(t_token **tokens)
     return (ft_lstnew(new_cmd));
 }
 
-t_list  *gen_exec_list(t_token **tokens)
+t_list  *gen_exec_list(t_token *tokens)
 {
     t_list  *exec_list;
     t_list  *exec_node;
 
     exec_list = NULL;
-    if (!(*tokens))
+    if (!tokens)
         return (NULL);
-    while (*tokens)
+    while (tokens)
     {
-        exec_node = parse_cmd(tokens); // overwrite ?
+        exec_node = parse_cmd(&tokens); // overwrite ?
         if (!exec_node)
             return (NULL);
         ft_lstadd_back(&exec_list, exec_node);
-        if (*tokens && (*tokens)->type == TOKEN_PIPE)
-            *tokens = (*tokens)->next;
+        if (tokens && tokens->type == TOKEN_PIPE)
+            tokens = tokens->next;
     }
     return (exec_list);
 }
 
-t_list *parse_tokens(t_token **tokens)
+t_list *parse_tokens(t_token *tokens)
 {
     // t_shell result;
     t_list  *exec_list;
@@ -136,8 +136,8 @@ t_list *parse_tokens(t_token **tokens)
         return (NULL);
     }
     // result.pipe_list = gen_pipe_list(*tokens);
-    free_tokens(tokens); // doesn't work
-    printf("%p\n", *tokens);
+    free_tokens(&tokens); // doesn't work
+    // printf("%p\n", *tokens);
     print_exec_list(exec_list);
     return (exec_list);
 }

@@ -13,10 +13,6 @@
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
-# ifndef GNL
-#  define GNL 0
-# endif
-
 # include "./libft/libft.h"
 # include <readline/history.h>
 # include <readline/readline.h>
@@ -49,8 +45,8 @@ typedef struct s_proc
 {
     char    **cmd_arr; // filled by token parser
     char    *fullpath; // to do later in pre-execution step
-    t_list  *redir_in; // filled by token parser
-    t_list  *redir_out; // filled by token parser
+    t_token *redir_in; // filled by token parser
+    t_token *redir_out; // filled by token parser
     int     fd_in; // to do in pipe parser
     int     fd_out; // to do in pipe parser
     // int  pipe[2];
@@ -87,15 +83,16 @@ void    print_tokens(t_token *tokens);
 void	free_tokens(t_token **tokens);
 
 /* parse tokens */
-t_list  *parse_tokens(t_token **tokens);
-t_list  *gen_exec_list(t_token **tokens);
+t_list  *parse_tokens(t_token *tokens);
+t_list  *gen_exec_list(t_token *tokens);
 t_list  *parse_cmd(t_token **tokens);
-bool    parse_redir(char *file, t_list **redir_list, t_token **tokens);
+bool    parse_redir(char *file, t_token **redir_list, t_token **tokens);
 bool    parse_cmd_and_arg(t_list **cmd_arg, t_token **tokens);
 bool    reform_as_cmd_arr(t_list *cmd_arg, t_proc *cmd);
 void    free_cmd_arg_list(t_list **cmd_arg);
 void    print_exec_list(t_list *exec_list);
 void    free_cmd_arr(char ***p_cmd_arr);
+void    free_exec_list(t_list **exec_list);
 
 /* main process */
 // void	shell_routine(t_env *env);

@@ -79,7 +79,7 @@ int		main(void)
 		add_history(line);
 		// printf("line of len %ld: %s\n", strlen(line), line);
 		tokens = check_syntax_and_tokenize(line);
-		exec_list = parse_tokens(&tokens);
+		exec_list = parse_tokens(tokens);
 		free_exec_list(&exec_list);
 		// if (!tokens)
 		// 	status = 258;
