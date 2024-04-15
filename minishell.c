@@ -22,7 +22,7 @@ bool	init_env(char **envp, t_ms *ms)
     i = -1;
 	while (envp[++i])
 	{
-        printf("%s\n", envp[i]);
+        // printf("%s\n", envp[i]);
 		j = 0;
 		while (envp[i][j] != '=')
 			j++;
@@ -32,11 +32,11 @@ bool	init_env(char **envp, t_ms *ms)
 		env_var->name = ft_substr(envp[i], 0, j);
 		if (!env_var->name)
 			return (FAILURE);
-        printf("%s\t", env_var->name);
+        // printf("%s\t", env_var->name);
 		env_var->value = ft_strdup(&envp[i][j + 1]);
 		if (!env_var->value)
 			return (FAILURE);
-        printf("%s\n", env_var->value);
+        // printf("%s\n", env_var->value);
 		env_var_node = ft_lstnew(env_var);
 		if (!env_var_node)
 			return (FAILURE);

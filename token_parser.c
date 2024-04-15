@@ -75,6 +75,7 @@ t_list  *parse_cmd(t_token **tokens)
         else if ((*tokens)->type == TOKEN_WORD)
             parse_cmd_and_arg(&cmd_arg, tokens);
     }
+    // pre_expand(&cmd_arg, new_cmd);
     reform_as_cmd_arr(cmd_arg, new_cmd);
     free_cmd_arg_list(&cmd_arg); // never skip this
     return (ft_lstnew(new_cmd));
