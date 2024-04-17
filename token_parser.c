@@ -105,11 +105,13 @@ bool    parse_tokens(t_token *tokens)
 {
     t_ms    *ms;
 
+    if (!tokens)
+        return (0);
     ms = get_ms();
     ms->cmds = gen_cmd_list(tokens);
     if (!ms->cmds)
     {
-        ft_putstr_fd("Token-parsing failed - malloc error.", 2);
+        ft_putstr_fd("Token-parsing failed - malloc error.\n", 2);
         return (0);
     }
     free_tokens(&tokens);

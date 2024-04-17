@@ -122,6 +122,7 @@ void    free_cmd_list(void)
     {
         next_cmd_node = (*cmd_list)->next;
         free_str_arr(&((t_cmd *)(*cmd_list)->content)->cmd_arr);
+        free(((t_cmd *)(*cmd_list)->content)->fullpath);
         free_tokens(&((t_cmd *)(*cmd_list)->content)->redir_in);
         free_tokens(&((t_cmd *)(*cmd_list)->content)->redir_out);
         free((*cmd_list)->content);

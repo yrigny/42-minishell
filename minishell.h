@@ -74,6 +74,7 @@ typedef struct s_ms
 
 /* main process */
 bool	init_env(char **envp, t_ms *ms);
+void	free_env(t_list *env);
 void	shell_routine(void);
 t_ms	*get_ms(void);
 int		empty_line(char *line);
@@ -114,12 +115,15 @@ void    print_cmd_list(t_list *exec_list);
 void    free_str_arr(char ***p_str_arr);
 void    free_cmd_list(void);
 
+/* pre-expand */
 void    pre_expand(t_list **cmd_arg, t_cmd *cmd);
-void    expand_cmd_path(t_cmd *cmd, char *executable);
-char    **get_paths_array(void);
-bool    has_expandable_dollar_str(t_list *arg, int *dollar_pos);
 void    expand_env_var(t_list **cmd_arg, int head);
 char    *match_env_var(char *name, int len);
+void    expand_cmd_path(t_cmd *cmd, char *executable);
+void    remove_quotes(t_list **str_node, char *old_str);
+bool    has_expandable_dollar_str(t_list *arg, int *dollar_pos);
+char    **get_paths_array(void);
 char    *assemble_new_str(char *old_str, char *value, int head, int end);
+char    *assemble_new_str2(char *old_str, int pair_of_quotes);
 
 #endif

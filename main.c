@@ -26,5 +26,6 @@ int	main(int argc, char **argv, char **envp)
 		return (FAILURE);
 	// ms->curr_dir = get_curr_dir();
 	shell_routine();
+	free_env(ms->env);
 	return (SUCCESS);
 }

@@ -45,6 +45,21 @@ bool	init_env(char **envp, t_ms *ms)
 	return (SUCCESS);
 }
 
+void	free_env(t_list *env)
+{
+	t_list	*tmp;
+
+	while (env)
+	{
+		tmp = env;
+		env = env->next;
+		free(((t_env *)tmp->content)->name);
+		free(((t_env *)tmp->content)->value);
+		free(tmp->content);
+		free(tmp);
+	}
+}
+
 void	shell_routine(void)
 {
 	char	*line;
@@ -64,6 +79,8 @@ void	shell_routine(void)
 		tokens = check_syntax_and_tokenize(line);
 		// if (!tokens)
 		// 	g_signal = 258;
+		if (!tokens)
+			continue ;
 		parse_tokens(tokens);
 		free_cmd_list();
 		// if (!g_signal)
