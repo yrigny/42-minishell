@@ -64,11 +64,9 @@ bool	has_invalid_redir(char *line)
 	{
 		while (*line && !ft_strchr("<>\'\"", *line))
 			line++;
-		if (*line == '\0')
-			return (0);
-		else if (*line == '\'' || *line == '\"')
+		if (*line == '\'' || *line == '\"')
 			skip_quoted(&line);
-		else // if (*line == '<' || *line == '>')
+		else if (*line == '<' || *line == '>')
 		{
 			redir_type = *line;
 			if (*(line + 1) == redir_type)
@@ -79,7 +77,8 @@ bool	has_invalid_redir(char *line)
 			if (*line == '\0' || ft_strchr("<>&|;", *line))
 				return (1);
 		}
-		line++;
+		if (*line)
+			line++;
 	}
 	return (0);
 }
@@ -107,7 +106,8 @@ bool	has_misplaced_oparator(char *line)
 		}
 		else if (!ft_isspace(*line))
 			cmd_is_expected = 0;
-		line++;
+		if (*line)
+			line++;
 	}
 	return (cmd_is_expected);
 }
@@ -128,7 +128,8 @@ bool	has_logical_oparator(char *line)
 					 || (*line == '&' && *(line + 1) == '&'))
 			return (1);
 		}
-		line++;
+		if (*line)
+			line++;
 	}
 	return (0);
 }
