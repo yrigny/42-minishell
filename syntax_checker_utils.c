@@ -15,25 +15,18 @@
 bool	syntax_error(char *line)
 {
 	if (has_unclosed_quote(line))
-	{
-		ft_putstr_fd("Syntax error: unclosed quote\n", STDERR_FILENO);
 		return (1);
-	}
+	if (has_unclosed_parenthesis(line))
+		return (1);
 	if (has_invalid_redir(line))
-	{
-		ft_putstr_fd("Syntax error: invalid redirection\n", STDERR_FILENO);
 		return (1);
-	}
-	if (has_logical_oparator(line))
-	{
-		ft_putstr_fd("Syntax error: && and || not supported\n", STDERR_FILENO);
-		return (1);
-	}
+	// if (has_logical_oparator(line))
+	// {
+	// 	ft_putstr_fd("Syntax error: && and || not supported\n", STDERR_FILENO);
+	// 	return (1);
+	// }
 	if (has_misplaced_oparator(line))
-	{
-		ft_putstr_fd("Syntax error: misplaced oparator\n", STDERR_FILENO);
 		return (1);
-	}
 	return (0);
 }
 
@@ -84,16 +77,30 @@ void	skip_quoted(char **line)
 		(*line)++;
 }
 
-void	update_open_quote(char **line, int *single_quote, int *double_quote)
+void	syntax_error_pos(char *pos)
 {
-	char	c;
-
-	c = **line;
-	if (!(c == '\'' || c == '\"'))
-		return ;
-	if (c == '\'')
-		*single_quote = (*single_quote + 1) % 2;
-	else if (c == '\"')
-		*double_quote = (*double_quote + 1) % 2;
-	(*line)++;
+	if (*pos == '\0')
+		ft_putstr_fd("minishell: syntax error near unexpected token `newline'\n", 2);
+	else if (*pos == '|' && *(pos + 1) == '|')
+		ft_putstr_fd("minishell: syntax error near unexpected token `||'\n", 2);
+	else if (*pos == '|' && *(pos + 1) != '|')
+		ft_putstr_fd("minishell: syntax error near unexpected token `|'\n", 2);
+	else if (*pos == '&' && *(pos + 1) == '&')
+		ft_putstr_fd("minishell: syntax error near unexpected token `&&'\n", 2);
+	else if (*pos == '&' && *(pos + 1) != '&')
+		ft_putstr_fd("minishell: syntax error near unexpected token `&'\n", 2);
+	else if (*pos == ';')
+		ft_putstr_fd("minishell: syntax error near unexpected token `;'\n", 2);
+	else if (*pos == '(')
+		ft_putstr_fd("minishell: syntax error near unexpected token `('\n", 2);
+	else if (*pos == ')')
+		ft_putstr_fd("minishell: syntax error near unexpected token `)'\n", 2);
+	else if (*pos == '<' && *(pos + 1) == '<')
+		ft_putstr_fd("minishell: syntax error near unexpected token `<<'\n", 2);
+	else if (*pos == '<' && *(pos + 1) != '<')
+		ft_putstr_fd("minishell: syntax error near unexpected token `<'\n", 2);
+	else if (*pos == '>' && *(pos + 1) == '>')
+		ft_putstr_fd("minishell: syntax error near unexpected token `>>'\n", 2);
+	else if (*pos == '>' && *(pos + 1) != '>')
+		ft_putstr_fd("minishell: syntax error near unexpected token ` | >'\n", 2);
 }

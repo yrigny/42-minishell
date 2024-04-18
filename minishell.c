@@ -22,7 +22,6 @@ bool	init_env(char **envp, t_ms *ms)
     i = -1;
 	while (envp[++i])
 	{
-        // printf("%s\n", envp[i]);
 		j = 0;
 		while (envp[i][j] != '=')
 			j++;
@@ -32,11 +31,9 @@ bool	init_env(char **envp, t_ms *ms)
 		env_var->name = ft_substr(envp[i], 0, j);
 		if (!env_var->name)
 			return (FAILURE);
-        // printf("%s\t", env_var->name);
 		env_var->value = ft_strdup(&envp[i][j + 1]);
 		if (!env_var->value)
 			return (FAILURE);
-        // printf("%s\n", env_var->value);
 		env_var_node = ft_lstnew(env_var);
 		if (!env_var_node)
 			return (FAILURE);
@@ -58,6 +55,21 @@ void	free_env(t_list *env)
 		free(tmp->content);
 		free(tmp);
 	}
+}
+
+void	exec_manager(void)
+{
+	t_ms	*ms;
+	t_list	*cmds;
+
+	ms = get_ms();
+	cmds = ms->cmds;
+	if (ft_lstsize(cmds) == 1)
+	{
+		single_cmd_exec(cmds->content); // to do
+		return ;
+	}
+	pipex(ms, cmds);
 }
 
 void	shell_routine(void)
@@ -82,13 +94,8 @@ void	shell_routine(void)
 		if (!tokens)
 			continue ;
 		parse_tokens(tokens);
+		exec_manager();
 		free_cmd_list();
-		// if (!g_signal)
-		// {
-		// 	exec_list = parse_tokens(&tokens);
-		// 	execution_manager(exec_list, env, &status);
-		// 	free_exec_list(exec_list);
-		// }
 		// update_env_status(env, status, "=?");
 	}
 	rl_clear_history();

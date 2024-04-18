@@ -25,6 +25,9 @@
 
 # define SUCCESS 1
 # define FAILURE 0
+# ifndef MAX_PIPE
+#  define MAX_PIPE 1024
+# endif
 
 typedef enum e_token_type
 {
@@ -47,12 +50,11 @@ typedef struct s_token
 typedef struct s_cmd
 {
     char    **cmd_arr; // filled by token parser
-    char    *fullpath; // to do later in pre-execution step
+    char    *fullpath; // filled by pre-expand
     t_token *redir_in; // filled by token parser
     t_token *redir_out; // filled by token parser
     int     fd_in; // to do in pipe parser
     int     fd_out; // to do in pipe parser
-    // int  pipe[2];
 }   t_cmd;
 
 typedef struct s_env
@@ -61,12 +63,18 @@ typedef struct s_env
     char    *value;
 }   t_env;
 
+typedef struct s_pipe
+{
+    int     fd[2];
+    pid_t   pid;
+}   t_pipe;
+
 typedef struct s_ms
 {
     char    *curr_dir; // why this?
     t_list  *env;
     t_list  *cmds;
-    pid_t   pids[1024];
+    t_pipe  pipe[MAX_PIPE];
     int     last_exit;
     pid_t   last_pipe_pid; // what's this?
 }   t_ms;
@@ -84,12 +92,13 @@ t_token	*check_syntax_and_tokenize(char *line);
 char	*trim_line(char *str);
 bool	syntax_error(char *line);
 bool	has_unclosed_quote(char *line);
+bool	has_unclosed_parenthesis(char *line);
 bool	has_invalid_redir(char *line);
 bool	has_misplaced_oparator(char *line);
-bool	has_logical_oparator(char *line);
-void	update_open_quote(char **line, int *single_quote, int *double_quote);
+// bool	has_logical_oparator(char *line);
 void	skip_space(char **line);
 void	skip_quoted(char **line);
+void	syntax_error_pos(char *pos);
 
 /* tokenization */
 t_token	*tokenize(char *line);
