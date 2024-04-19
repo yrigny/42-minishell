@@ -57,20 +57,20 @@ void	free_env(t_list *env)
 	}
 }
 
-// void	exec_manager(void)
-// {
-// 	t_ms	*ms;
-// 	t_list	*cmds;
+void	exec_manager(void)
+{
+	t_ms	*ms;
+	t_list	*cmds;
 
-// 	ms = get_ms();
-// 	cmds = ms->cmds;
-// 	if (ft_lstsize(cmds) == 1)
-// 	{
-// 		single_cmd_exec(cmds->content); // to do
-// 		return ;
-// 	}
-// 	pipex(ms, cmds);
-// }
+	ms = get_ms();
+	cmds = ms->cmds;
+	if (ft_lstsize(cmds) == 1)
+	{
+		single_cmd_exec(cmds->content); // to do
+		return ;
+	}
+	pipex(ms, cmds);
+}
 
 void	shell_routine(void)
 {
@@ -88,14 +88,14 @@ void	shell_routine(void)
 		if (empty_line(line))
 			continue ;
 		add_history(line);
-		tokens = tokenize_and_check_syntax(line);
+		tokens = check_syntax_and_tokenize(line);
 		// if (!tokens)
 		// 	g_signal = 258;
 		if (!tokens)
 			continue ;
-		// parse_tokens_into_cmds(tokens);
-		// exec_manager();
-		// free_cmd_list();
+		parse_tokens(tokens);
+		exec_manager();
+		free_cmd_list();
 		// update_env_status(env, status, "=?");
 	}
 	rl_clear_history();

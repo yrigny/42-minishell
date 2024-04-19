@@ -1,16 +1,94 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   tokenizer.c                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: yrigny <marvin@42.fr>                      +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/01 15:47:21 by yrigny            #+#    #+#             */
-/*   Updated: 2024/04/01 15:47:24 by yrigny           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "minishell.h"
+
+t_token *tokenize_and_check_syntax(char *line)
+{
+    char	*trimmed_line;
+	t_token	*tokens;
+
+	trimmed_line = trim_line(line);
+	free(line);
+	if (!trimmed_line)
+		return (NULL);
+    tokens = tokenize(trimmed_line);
+    free(trimmed_line);
+    if (!tokens)
+		return (NULL);
+    // if (syntax_error(tokens))
+	// {
+	// 	free_tokens(&tokens);
+	// 	return (NULL);
+	// }
+    return (tokens);
+}
+
+t_token *tokenize(char *line)
+{
+    t_token	        *tokens;
+	char	        *start;
+    char            *end;
+    t_token_type    type;
+
+	tokens = NULL;
+	while (*line)
+	{
+		start = line;
+        type = get_token_type(start);
+        end = find_end_of_token(start, type);
+        if (ft_strchr("|&;()<>", *start))
+            tokens = concatenate(tokens, new_metacharacter(start, type));
+        else
+            tokens = concatenate(tokens, new_word(start, end));
+        line = end;
+        while (*line && ft_isspace(*line))
+		    line++;
+	}
+	print_tokens(tokens);
+	return (tokens);
+}
+
+t_token	*new_metacharacter(char *start, t_token_type type)
+{
+    if (type == TOKEN_PIPE)
+	    return(new_token(type, "|"));
+    else if (type == TOKEN_OR)
+        return(new_token(type, "||"));
+    else if (type == TOKEN_AND)
+        return(new_token(type, "&&"));
+    else if (type == TOKEN_PRT_L)
+        return(new_token(type, "("));
+    else if (type == TOKEN_PRT_R)
+        return(new_token(type, ")"));
+	else if (type == TOKEN_REDIR_IN)
+		return(new_token(type, "<"));
+	else if (type == TOKEN_REDIR_HEREDOC)
+		return(new_token(type, "<<"));
+	else if (type == TOKEN_REDIR_OUT)
+		return(new_token(type, ">"));
+	else if (type == TOKEN_REDIR_APPEND)
+		return(new_token(type, ">>"));
+    else if (type == TOKEN_UNACCEPTED && *start == '&')
+        return (new_token(type, "&"));
+    else if (type == TOKEN_UNACCEPTED && *start == ';')
+        return (new_token(type, ";"));
+    else
+        return (NULL);
+}
+
+t_token	*new_word(char *start, char *end)
+{
+	char	*word;
+	t_token	*new;
+
+	word = NULL;
+	new = NULL;
+	word = malloc(end - start + 1);
+	if (!word)
+		return (NULL);
+	ft_strlcpy(word, start, end - start + 1);
+	new = new_token(TOKEN_WORD, word);
+	free(word);
+	return (new);
+}
 
 t_token	*new_token(t_token_type type, char *value)
 {
@@ -30,91 +108,3 @@ t_token	*new_token(t_token_type type, char *value)
 	return (new);
 }
 
-t_token	*new_word(char *start, char **end)
-{
-	char	*word;
-	t_token	*new;
-
-	word = NULL;
-	new = NULL;
-	word = malloc(*end - start + 1);
-	if (!word)
-		return (NULL);
-	ft_strlcpy(word, start, *end - start + 1);
-	new = new_token(TOKEN_WORD, word);
-	free(word);
-	while (**end && ft_isspace(**end))
-		(*end)++;
-	return (new);
-}
-
-t_token	*new_metacharacter(char *start, char **end)
-{
-	t_token	*new;
-
-	new = NULL;
-	if (*start == '<' && (*end - start == 1))
-		new = new_token(TOKEN_REDIR_IN, "<");
-	if (*start == '<' && (*end - start == 2))
-		new = new_token(TOKEN_REDIR_HEREDOC, "<<");
-	if (*start == '>' && (*end - start == 1))
-		new = new_token(TOKEN_REDIR_OUT, ">");
-	if (*start == '>' && (*end - start == 2))
-		new = new_token(TOKEN_REDIR_APPEND, ">>");
-	if (*start == '|')
-	    new = new_token(TOKEN_PIPE, "|");
-	while (**end && ft_isspace(**end))
-		(*end)++;
-	return (new);
-}
-
-t_token	*concatenate(t_token *tokens, t_token *new)
-{
-	t_token	*tail;
-
-	if (!new)
-	{
-		free_tokens(&tokens);
-		ft_putstr_fd("Tokenization failed - malloc error.", 2);
-		return (NULL);
-	}
-	if (!tokens)
-		tokens = new;
-	else
-	{
-		tail = tokens;
-		while (tail->next)
-			tail = tail->next;
-		tail->next = new;
-	}
-	return (tokens);
-}
-
-t_token	*tokenize(char *line)
-{
-	t_token	*tokens;
-	char	*start;
-	int		in_quote;
-
-	tokens = NULL;
-	in_quote = 0;
-	while (*line)
-	{
-		start = line;
-		while (*line)
-		{
-			update_in_quote(*line, &in_quote);
-			line++;
-			if (!in_quote && (ft_isspace(*line) || type_diff(*start, *line)))
-				break ;
-		}
-		if (*start && ft_strchr("<>|", *start))
-			tokens = concatenate(tokens, new_metacharacter(start, &line));
-		else
-			tokens = concatenate(tokens, new_word(start, &line));
-		if (!tokens)
-			break ;
-	}
-	// print_tokens(tokens);
-	return (tokens);
-}

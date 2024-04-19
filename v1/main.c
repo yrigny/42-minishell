@@ -29,11 +29,3 @@ int	main(int argc, char **argv, char **envp)
 	free_env(ms->env);
 	return (SUCCESS);
 }
-
-// Todo:
-// 1. pre-expand redir_in and redir_out list
-// 2. try open each redir_in, throw err msg if doesn't exist, set active one to fd_in
-// 3. for heredoc type redir_in, create helper func to receive
-// 4. detect builtin cmd, send to its func to exec
-// 5. for external cmd, check if fullpath is executable
-// 6. try open each redir_out (create if not yet), empty silent ones, set active one to fd_out
