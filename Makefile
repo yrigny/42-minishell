@@ -8,6 +8,7 @@ LFLAGS 		= -L$(FT_DIR) -lft -lreadline
 
 CFILES		= main.c minishell.c minishell_utils.c \
 			tokenizer.c tokenizer_utils.c \
+			syntax_checker.c
 
 OFILES		= $(CFILES:.c=.o)
 

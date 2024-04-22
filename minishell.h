@@ -106,7 +106,11 @@ void    print_tokens(t_token *tokens);
 void	free_tokens(t_token **tokens);
 
 /* syntax check */
-
+bool    syntax_error(t_token *tokens);
+bool    update_parenthesis(t_token_type type, int *open_prt);
+bool    has_unclosed_quote(char *str);
+bool    wrong_next_token_type(t_token *curr, t_token *next);
+bool    syntax_error_msg(char *s);
 
 /* parse tokens */
 

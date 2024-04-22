@@ -13,11 +13,11 @@ t_token *tokenize_and_check_syntax(char *line)
     free(trimmed_line);
     if (!tokens)
 		return (NULL);
-    // if (syntax_error(tokens))
-	// {
-	// 	free_tokens(&tokens);
-	// 	return (NULL);
-	// }
+    if (syntax_error(tokens))
+	{
+		free_tokens(&tokens);
+		return (NULL);
+	}
     return (tokens);
 }
 
@@ -42,7 +42,7 @@ t_token *tokenize(char *line)
         while (*line && ft_isspace(*line))
 		    line++;
 	}
-	print_tokens(tokens);
+	// print_tokens(tokens);
 	return (tokens);
 }
 
@@ -107,4 +107,3 @@ t_token	*new_token(t_token_type type, char *value)
 	new->next = NULL;
 	return (new);
 }
-
