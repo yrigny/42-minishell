@@ -31,7 +31,7 @@ int	main(int argc, char **argv, char **envp)
 }
 
 // Todo:
-// 1. pre-expand redir_in and redir_out list
+// 1. (OK) pre-expand tokens before parsing tokens
 // 2. try open each redir_in, throw err msg if doesn't exist, set active one to fd_in
 // 3. for heredoc type redir_in, create helper func to receive
 // 4. detect builtin cmd, send to its func to exec

@@ -93,9 +93,9 @@ void	shell_routine(void)
 		// 	g_signal = 258;
 		if (!tokens)
 			continue ;
-		// parse_tokens_into_cmds(tokens);
+		parse_token_into_cmds(tokens);
 		// exec_manager();
-		// free_cmd_list();
+		free_cmd_list();
 		// update_env_status(env, status, "=?");
 	}
 	rl_clear_history();

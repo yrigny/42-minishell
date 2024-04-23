@@ -112,26 +112,3 @@ t_token	*concatenate(t_token *tokens, t_token *new)
 	}
 	return (tokens);
 }
-
-void    print_tokens(t_token *tokens)
-{
-    while (tokens)
-    {
-        printf("type: %d\tvalue: [%s]\n", tokens->type, tokens->value);
-        tokens = tokens->next;
-    }
-}
-
-void	free_tokens(t_token **tokens)
-{
-	t_token	*temp;
-
-    temp = NULL;
-	while (*tokens)
-	{
-		temp = (*tokens)->next;
-		free((*tokens)->value);
-		free(*tokens);
-		*tokens = temp;
-	}
-}

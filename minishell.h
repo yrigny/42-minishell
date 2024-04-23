@@ -102,8 +102,6 @@ t_token	*new_token(t_token_type type, char *value);
 t_token	*concatenate(t_token *tokens, t_token *new);
 t_token_type    get_token_type(char *s);
 void	skip_if_quoted(char **line);
-void    print_tokens(t_token *tokens);
-void	free_tokens(t_token **tokens);
 
 /* syntax check */
 bool    syntax_error(t_token *tokens);
@@ -112,10 +110,33 @@ bool    has_unclosed_quote(char *str);
 bool    wrong_next_token_type(t_token *curr, t_token *next);
 bool    syntax_error_msg(char *s);
 
-/* parse tokens */
-
-
 /* pre-expand */
+void    pre_expand(t_token *tokens);
+void    expand_env_var(t_token *token, int head);
+char    *match_env_var(char *name, int len);
+void    remove_quotes(t_token *token, char *old_str);
+bool    has_expandable_dollar_str(t_token *token, int *dollar_pos);
+char    *assemble_new_str(char *old_str, char *value, int head, int end);
+char    *assemble_new_str2(char *old_str, int pair_of_quotes);
+void    expand_fullpath(t_list *cmds);
+char    **get_paths_array(void);
+void    assemble_fullpath(t_cmd *cmd, char *cmd_name, char **paths);
 
+/* parse tokens */
+void    parse_token_into_cmds(t_token *tokens);
+t_list  *gen_cmd_list(t_token *tokens);
+t_list  *parse_cmd(t_token **tokens);
+void    parse_redir(char *file, t_token **redir_list, t_token **tokens);
+void    parse_cmd_and_arg(t_list **cmd_arg, t_token **tokens);
+void    reform_as_cmd_arr(t_list *cmd_arg, t_cmd *cmd);
+void    free_cmd_arg_list(t_list **cmd_arg);
+void    free_str_arr(char ***p_str_arr);
+void    free_cmd_list(void);
+void	free_tokens(t_token **tokens);
+
+/* helper */
+void    print_tokens(t_token *tokens);
+void    print_cmd_list(t_list *cmd_list);
+bool    is_builtin(char *cmd_name);
 
 #endif

@@ -1,29 +1,29 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   syntax_checker.c                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: yrigny <marvin@42.fr>                      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/04/22 19:12:30 by yrigny            #+#    #+#             */
+/*   Updated: 2024/04/22 19:12:33 by yrigny           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
-
-// TOKEN_WORD,         // check unclosed quote
-// TOKEN_PIPE,         // '|' must not be the 1st token or followed by ')' '|' '||' '&&'
-// TOKEN_OR,           // '||' must not be the 1st token or followed by ')' '|' '||' '&&'
-// TOKEN_AND,          // '&&' must not be the 1st token or followed by ')' '|' '||' '&&'
-// TOKEN_PRT_L,        // '(' must not be single, or followed by ')' '|' '||' '&&'
-// TOKEN_PRT_R,        // ')' must not be single, or followed by word token or '('
-// TOKEN_REDIR_IN,     // '<' must be followed by word token
-// TOKEN_REDIR_HEREDOC,// '<<' idem
-// TOKEN_REDIR_OUT,    // '>' idem
-// TOKEN_REDIR_APPEND, // '>>' idem
-// TOKEN_UNACCEPTED,   // '&' ';' should be rejected
-
-bool    syntax_error_msg(char *s)
-{
-    char    *tmp;
-    char    *final;
-
-    tmp = ft_strjoin("minishell: syntax error near unexpected token `", s);
-    final = ft_strjoin(tmp, "'\n");
-    ft_putstr_fd(final, 2);
-    free(tmp);
-    free(final);
-    return (1);
-}
+/*
+TOKEN_WORD,         // check unclosed quote
+TOKEN_PIPE,         // '|' must not be the 1st token or followed by ')' '|' '||' '&&'
+TOKEN_OR,           // '||' must not be the 1st token or followed by ')' '|' '||' '&&'
+TOKEN_AND,          // '&&' must not be the 1st token or followed by ')' '|' '||' '&&'
+TOKEN_PRT_L,        // '(' must not be single, or followed by ')' '|' '||' '&&'
+TOKEN_PRT_R,        // ')' must not be single, or followed by word token or '('
+TOKEN_REDIR_IN,     // '<' must be followed by word token
+TOKEN_REDIR_HEREDOC,// '<<' idem
+TOKEN_REDIR_OUT,    // '>' idem
+TOKEN_REDIR_APPEND, // '>>' idem
+TOKEN_UNACCEPTED,   // '&' ';' should be rejected
+*/
 
 bool    syntax_error(t_token *tokens)
 {
@@ -48,6 +48,19 @@ bool    syntax_error(t_token *tokens)
     if (open_prt > 0)
         return (syntax_error_msg("newline"));
     return (0);
+}
+
+bool    syntax_error_msg(char *s)
+{
+    char    *tmp;
+    char    *final;
+
+    tmp = ft_strjoin("minishell: syntax error near unexpected token `", s);
+    final = ft_strjoin(tmp, "'\n");
+    ft_putstr_fd(final, 2);
+    free(tmp);
+    free(final);
+    return (1);
 }
 
 bool    update_parenthesis(t_token_type type, int *open_prt)
