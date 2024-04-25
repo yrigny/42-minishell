@@ -57,21 +57,6 @@ void	free_env(t_list *env)
 	}
 }
 
-// void	exec_manager(void)
-// {
-// 	t_ms	*ms;
-// 	t_list	*cmds;
-
-// 	ms = get_ms();
-// 	cmds = ms->cmds;
-// 	if (ft_lstsize(cmds) == 1)
-// 	{
-// 		single_cmd_exec(cmds->content); // to do
-// 		return ;
-// 	}
-// 	pipex(ms, cmds);
-// }
-
 void	shell_routine(void)
 {
 	char	*line;
@@ -94,7 +79,7 @@ void	shell_routine(void)
 		if (!tokens)
 			continue ;
 		parse_token_into_cmds(tokens);
-		// exec_manager();
+		exec_manager();
 		free_cmd_list();
 		// update_env_status(env, status, "=?");
 	}

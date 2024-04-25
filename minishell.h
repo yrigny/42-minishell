@@ -22,6 +22,7 @@
 # include <string.h>
 # include <sys/types.h>
 # include <sys/wait.h>
+# include <errno.h>
 
 # define SUCCESS 1
 # define FAILURE 0
@@ -80,7 +81,7 @@ typedef struct s_ms
     t_list  *cmds;
     t_pipe  pipe[MAX_PIPE];
     int     last_exit;
-    pid_t   last_pipe_pid; // what's this?
+    // pid_t   last_pipe_pid; // what's this?
 }   t_ms;
 
 
@@ -134,9 +135,41 @@ void    free_str_arr(char ***p_str_arr);
 void    free_cmd_list(void);
 void	free_tokens(t_token **tokens);
 
+/* execution */
+void	exec_manager(void);
+void    single_cmd_exec(t_cmd *cmd);
+void    pipex(t_ms *ms, t_list *cmds);
+void    fork_children(int nb_cmds, t_pipe pipe_arr[MAX_PIPE], t_list *cmds);
+void	child_first(t_cmd *child, int pipe[2]);
+void	child_middle(t_cmd *child, int pipe1[2], int pipe2[2]);
+void	child_last(t_cmd *child, int pipe[2]);
+bool    cmd_exists(t_cmd *child);
+bool	cmd_is_executable(t_cmd *child);
+void	execute_cmd(t_cmd *child);
+void	exec_builtin(t_cmd *child);
+void	catch_last_status(int *status);
+
+/* pre-execution */
+void    handle_redir_in(t_cmd *cmd);
+int     receive_heredoc(char *delimiter);
+void    handle_redir_out(t_cmd *cmd);
+
 /* helper */
 void    print_tokens(t_token *tokens);
 void    print_cmd_list(t_list *cmd_list);
 bool    is_builtin(char *cmd_name);
+
+/* builtins */
+int	    ft_echo(char **args);
+void    edit_env_value(t_list *env, char *name, char *new_value);
+int	    ft_cd(char **args, t_list *env);
+int	    err(const char *msg, int ret);
+int	    ft_pwd(void);
+int     is_name_valid(const char *name);
+void	ft_export(char **args, t_list *env);
+void    free_and_relink(t_list *prev, t_list *current);
+void    ft_unset(char **args, t_list *env);
+void	print_env(t_list *env);
+void	ft_exit(t_ms *shell);
 
 #endif

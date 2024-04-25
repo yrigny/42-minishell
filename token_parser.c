@@ -17,7 +17,7 @@ void    parse_token_into_cmds(t_token *tokens)
     }
     free_tokens(&tokens);
     expand_fullpath(ms->cmds);
-    print_cmd_list(ms->cmds);
+    // print_cmd_list(ms->cmds);
 }
 
 t_list  *gen_cmd_list(t_token *tokens)
