@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   minishell.c                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: yrigny <marvin@42.fr>                      +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/12 16:55:53 by yrigny            #+#    #+#             */
-/*   Updated: 2024/04/12 16:55:54 by yrigny           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "minishell.h"
 
 bool	init_env(char **envp, t_ms *ms)
@@ -27,19 +15,19 @@ bool	init_env(char **envp, t_ms *ms)
 			j++;
 		env_var = malloc(sizeof(t_env));
 		if (!env_var)
-			return (FAILURE);
+			return (0);
 		env_var->name = ft_substr(envp[i], 0, j);
 		if (!env_var->name)
-			return (FAILURE);
+			return (0);
 		env_var->value = ft_strdup(&envp[i][j + 1]);
 		if (!env_var->value)
-			return (FAILURE);
+			return (0);
 		env_var_node = ft_lstnew(env_var);
 		if (!env_var_node)
-			return (FAILURE);
+			return (0);
 		ft_lstadd_back(&ms->env, env_var_node);
 	}
-	return (SUCCESS);
+	return (1);
 }
 
 void	free_env(t_list *env)
@@ -74,14 +62,12 @@ void	shell_routine(void)
 			continue ;
 		add_history(line);
 		tokens = tokenize_and_check_syntax(line);
-		// if (!tokens)
-		// 	g_signal = 258;
 		if (!tokens)
 			continue ;
 		parse_token_into_cmds(tokens);
 		exec_manager();
 		free_cmd_list();
-		// update_env_status(env, status, "=?");
+		// clean_tmp_files();
 	}
 	rl_clear_history();
 }

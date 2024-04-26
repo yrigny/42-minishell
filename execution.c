@@ -69,11 +69,11 @@ void	catch_last_status(int *status)
 	if (WIFEXITED(*status))
 	{
 		get_ms()->last_exit = WEXITSTATUS(*status);
-		printf("Exit status of the child was %d\n", get_ms()->last_exit);
+		// printf("Exit status of the child was %d\n", get_ms()->last_exit);
 	}
 	else if (WIFSIGNALED(*status))
 	{
 		get_ms()->last_exit = WTERMSIG(*status);
-		printf("Exit status of the child was %d\n", get_ms()->last_exit);
+		// printf("Exit status of the child was %d\n", get_ms()->last_exit);
 	}
 }

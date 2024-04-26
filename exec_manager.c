@@ -8,11 +8,10 @@ void	exec_manager(void)
 	ms = get_ms();
 	cmds = ms->cmds;
 	if (ft_lstsize(cmds) == 1)
-	{
 		single_cmd_exec(cmds->content);
-		return ;
-	}
-	pipex(ms, cmds);
+	else
+		pipex(ms, cmds);
+	// clean tmp heredoc files
 }
 
 void    single_cmd_exec(t_cmd *cmd)

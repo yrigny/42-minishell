@@ -170,5 +170,6 @@ void	ft_exit(t_ms *shell)
 	ft_printf("exit\n");
 	free_cmd_list();
 	free_env(shell->env);
+	free(shell->last_exit_in_str);
 	exit(0);
 }

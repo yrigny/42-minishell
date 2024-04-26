@@ -1,11 +1,22 @@
 #include "minishell.h"
 
-// $ cat < in < Makefile
-// bash: in: No such file or directory
+void    handle_redirections(t_list *cmds)
+{
+    t_cmd   *curr_cmd;
+
+    while (cmds)
+    {
+        curr_cmd = (t_cmd *)cmds->content;
+        handle_redir_in(curr_cmd);
+        handle_redir_out(curr_cmd);
+        cmds = cmds->next;
+    }
+}
 
 void    handle_redir_in(t_cmd *cmd)
 {
     t_token *src;
+    char    *filename;
 
     src = cmd->redir_in;
     if (!src)
@@ -13,7 +24,11 @@ void    handle_redir_in(t_cmd *cmd)
     while (src)
     {
         if (src->type == TOKEN_REDIR_HEREDOC)
-            cmd->fd_in = receive_heredoc(src->value);
+        {
+            filename = gen_unique_filename((unsigned long)cmd);
+            cmd->fd_in = receive_heredoc(src->value, filename);
+            free(filename);
+        }
         else if (src->type == TOKEN_REDIR_IN)
             cmd->fd_in = open(src->value, O_RDONLY, 0644);
         if (cmd->fd_in == -1)
@@ -26,12 +41,12 @@ void    handle_redir_in(t_cmd *cmd)
     }
 }
 
-int receive_heredoc(char *delimiter) // add prefix to let each cmd have its own heredoc
+int receive_heredoc(char *delimiter, char *filename)
 {
     int     fd_tmp;
     char    *line;
 
-    fd_tmp = open(".heredoc.tmp", O_CREAT | O_WRONLY | O_TRUNC, 0644);
+    fd_tmp = open(filename, O_CREAT | O_WRONLY | O_TRUNC, 0644);
     while (1)
     {
         ft_putstr_fd("> ", 1);
@@ -48,7 +63,23 @@ int receive_heredoc(char *delimiter) // add prefix to let each cmd have its own 
         free(line);
     }
     close(fd_tmp);
-    return (open(".heredoc.tmp", O_RDONLY, 0644));
+    return (open(filename, O_RDONLY, 0644));
+}
+
+char    *gen_unique_filename(unsigned long p)
+{
+    char    address[17];
+    char    *hex_char;
+    char    *filename;
+    int     i;
+
+    hex_char = "0123456789abcdef";
+    i = -1;
+    while(++i < 16)
+        address[i] = hex_char[(p >> (4 * (15 - i))) & 0xf];
+    address[i] = '\0';
+    filename = ft_strjoin(address, ".heredoc.tmp");
+    return (filename);
 }
 
 void    handle_redir_out(t_cmd *cmd)

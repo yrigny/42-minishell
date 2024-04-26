@@ -12,7 +12,8 @@ bool    has_expandable_dollar_str(t_token *token, int *dollar_pos)
         if (*str == '\'')
             single_quote_open = (single_quote_open + 1) % 2;
         else if (!single_quote_open && *str == '$'
-                && (ft_isalnum(*(str + 1)) || *(str + 1) == '_'))
+                && ((ft_isalnum(*(str + 1)) || *(str + 1) == '_')
+                || *(str + 1) == '?'))
         {
             *dollar_pos = str - token->value;
             return (1);

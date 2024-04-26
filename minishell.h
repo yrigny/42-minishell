@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   minishell.h                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: ael-mank <ael-mank@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/03/13 09:36:17 by ael-mank          #+#    #+#             */
-/*   Updated: 2024/03/13 09:48:07 by ael-mank         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
@@ -24,8 +12,6 @@
 # include <sys/wait.h>
 # include <errno.h>
 
-# define SUCCESS 1
-# define FAILURE 0
 # ifndef MAX_PIPE
 #  define MAX_PIPE 1024
 # endif
@@ -76,11 +62,12 @@ typedef struct s_pipe
 
 typedef struct s_ms
 {
-    char    *curr_dir; // why this?
+    char    *curr_dir;
     t_list  *env;
     t_list  *cmds;
     t_pipe  pipe[MAX_PIPE];
     int     last_exit;
+    char    *last_exit_in_str;
     // pid_t   last_pipe_pid; // what's this?
 }   t_ms;
 
@@ -150,8 +137,10 @@ void	exec_builtin(t_cmd *child);
 void	catch_last_status(int *status);
 
 /* pre-execution */
+void    handle_redirections(t_list *cmds);
 void    handle_redir_in(t_cmd *cmd);
-int     receive_heredoc(char *delimiter);
+int     receive_heredoc(char *delimiter, char *filename);
+char    *gen_unique_filename(unsigned long p);
 void    handle_redir_out(t_cmd *cmd);
 
 /* helper */

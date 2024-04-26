@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   pipex.c                                            :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: yrigny <marvin@42.fr>                      +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/15 13:51:14 by yrigny            #+#    #+#             */
-/*   Updated: 2024/04/25 13:13:25 by yrigny           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "minishell.h"
 
 void    pipex(t_ms *ms, t_list *cmds)
@@ -25,6 +13,7 @@ void    pipex(t_ms *ms, t_list *cmds)
         if (pipe(ms->pipe[i].fd) == -1)
             exit(EXIT_FAILURE);
     }
+	handle_redirections(cmds);
     fork_children(nb_cmds, ms->pipe, cmds);
     close(ms->pipe[i - 1].fd[0]);
     close(ms->pipe[i - 1].fd[1]);
@@ -63,8 +52,6 @@ void    fork_children(int nb_cmds, t_pipe pipe_arr[MAX_PIPE], t_list *cmds)
 
 void	child_first(t_cmd *child, int pipe[2])
 {
-	handle_redir_in(child);
-	handle_redir_out(child);
 	dup2(child->fd_in, STDIN_FILENO);
 	if (child->fd_out == STDOUT_FILENO)
 		dup2(pipe[1], STDOUT_FILENO);
@@ -79,8 +66,6 @@ void	child_first(t_cmd *child, int pipe[2])
 
 void	child_middle(t_cmd *child, int pipe1[2], int pipe2[2])
 {
-	handle_redir_in(child);
-	handle_redir_out(child);
 	if (child->fd_in == STDIN_FILENO)
 		dup2(pipe1[0], STDIN_FILENO);
 	else if (child->fd_in != STDIN_FILENO)
@@ -102,8 +87,6 @@ void	child_middle(t_cmd *child, int pipe1[2], int pipe2[2])
 
 void	child_last(t_cmd *child, int pipe[2])
 {
-	handle_redir_in(child);
-	handle_redir_out(child);
 	if (child->fd_in == STDIN_FILENO)
 		dup2(pipe[0], STDIN_FILENO);
 	else if (child->fd_in != STDIN_FILENO)
