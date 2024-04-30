@@ -4,7 +4,7 @@
 
 int	main(int argc, char **argv, char **envp)
 {
-	t_ms *ms;
+	t_ms	*ms;
 
 	(void)argc;
 	(void)argv;
@@ -14,8 +14,7 @@ int	main(int argc, char **argv, char **envp)
 		return (EXIT_FAILURE);
 	// ms->curr_dir = getcwd(NULL, 0);
 	shell_routine();
-	free_env(ms->env);
-	free(get_ms()->last_exit_in_str);
+	free_env();
 	return (EXIT_SUCCESS);
 }
 
@@ -30,8 +29,9 @@ int	main(int argc, char **argv, char **envp)
 // 8. (OK) create independent heredoc for each cmd
 // 9. set exit status 2 (misused builtin), 128 (invalid argument to exit), and 128+n (fatal error signal)
 // 10. add signals handler
-// 11. debug builtins
-// 12. clean tmp heredoc files after each line executed
-// 13. replace current prompt with customized prompt ("user:cwd$ ")
-// 14. fix bug with str replacement of "$?"
-// 14. norminette
+// 11. debug builtins (export segfult when no argument)
+// 12. (OK) clean tmp heredoc files after each line executed
+// 13. (OK) replace current prompt with customized prompt ("user:cwd$ ")
+// 14. (OK) fix bug with str replacement of "$?"
+// 15. (OK) free malloc'd thing in each child process
+// 16. norminette

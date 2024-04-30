@@ -23,18 +23,16 @@ void    expand_env_var(t_token *token, int head)
 
     old_str = token->value;
     end = head + 1;
-    if (old_str[end] == '?')
-        end += 1;
-    else
+    if (old_str[end] != '?')
     {
         while (ft_isalnum(old_str[end + 1]) || old_str[end + 1] == '_')
             end++;
     }
     env_var_value = match_env_var(&old_str[head + 1], end - head);
-    printf("env_var_value: [%s]\n", env_var_value);
+    // printf("env_var_value: [%s]\n", env_var_value);
     new_str = assemble_new_str(old_str, env_var_value, head, end);
     free(old_str);
-    printf("new str: %s\n", new_str);
+    // printf("new str: %s\n", new_str);
     token->value = new_str;
 }
 
@@ -42,15 +40,18 @@ char    *match_env_var(char *name, int len)
 {
     t_list  *env;
     int     last_exit;
-    char    *last_exit_in_str;
 
-    if (len == 2 && !ft_strncmp(name, "?", 2))
+    if (len == 1 && !ft_strncmp(name, "?", 2))
     {
         last_exit = get_ms()->last_exit;
-        last_exit_in_str = get_ms()->last_exit_in_str;
-        free(last_exit_in_str);
-        last_exit_in_str = ft_itoa(last_exit);
-        return (last_exit_in_str);
+        if (last_exit == 0)
+            return ("0");
+        if (last_exit == 1)
+            return ("1");
+        if (last_exit == 126)
+            return ("126");
+        if (last_exit == 127)
+            return ("127");
     }
     env = get_ms()->env;
     while (env && ft_strncmp(((t_env *)env->content)->name, name, len))

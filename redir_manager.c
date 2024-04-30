@@ -27,6 +27,7 @@ void    handle_redir_in(t_cmd *cmd)
         {
             filename = gen_unique_filename((unsigned long)cmd);
             cmd->fd_in = receive_heredoc(src->value, filename);
+            unlink(filename);
             free(filename);
         }
         else if (src->type == TOKEN_REDIR_IN)

@@ -2,8 +2,8 @@
 
 int	ft_echo(char **args)
 {
-	int (i) = 1;
-	int (n) = 0;
+	int(i) = 1;
+	int(n) = 0;
 	while (ft_strncmp("-n", args[i], 2) == 0)
 	{
 		n = 1;
@@ -18,29 +18,31 @@ int	ft_echo(char **args)
 	}
 	if (!n)
 		printf("\n");
-	return (1);
+	return (0);
 }
 
-void edit_env_value(t_list *env, char *name, char *new_value)
+void	edit_env_value(t_list *env, char *name, char *new_value)
 {
-    while (env)
-    {
-        t_env *env_var = (t_env *)env->content;
-        if (strcmp(env_var->name, name) == 0)
-        {
-            free(env_var->value);
-            env_var->value = strdup(new_value);
-            if (!env_var->value)
+	t_env	*env_var;
+
+	while (env)
+	{
+		env_var = (t_env *)env->content;
+		if (strcmp(env_var->name, name) == 0)
+		{
+			free(env_var->value);
+			env_var->value = strdup(new_value);
+			if (!env_var->value)
 				return ;
-            break;
-        }
-        env = env->next;
-    }
+			break ;
+		}
+		env = env->next;
+	}
 }
 
 int	ft_cd(char **args, t_list *env)
 {
-	char *old_pwd;
+	char	*old_pwd;
 
 	old_pwd = getcwd(NULL, 0);
 	if (args[1] == NULL)
@@ -57,7 +59,7 @@ int	ft_cd(char **args, t_list *env)
 		if (chdir(args[1]) != 0)
 			perror("ft_cd");
 	}
-	return (1);
+	return (0);
 }
 
 int	err(const char *msg, int ret)
@@ -69,90 +71,97 @@ int	err(const char *msg, int ret)
 
 int	ft_pwd(void)
 {
-	char *path;
+	char	*path;
 
 	path = getcwd(NULL, 0);
 	if (!path)
-		return (err("Error getting current directory", -1));
+		return (err("Error getting current directory", 1));
 	ft_printf("%s\n", path);
 	free(path);
 	return (0);
 }
 
-int is_name_valid(const char *name)
+int	is_name_valid(const char *name)
 {
 	if (!name)
-		return(0);
-	int (i) = 0;
+		return (0);
+	int(i) = 0;
 	while (name[i])
 	{
 		if (!ft_isalnum(name[i]))
-			return(0);
+			return (0);
 		i++;
 	}
-	return(1);
+	return (1);
 }
 
-void	ft_export(char **args, t_list *env)
+int	ft_export(char **args, t_list *env)
 {
 	t_env	*env_var;
 	t_list	*env_var_node;
-	char **name_value;
-	
+	char	**name_value;
+
 	name_value = ft_split(args[1], '=');
 	if (!is_name_valid(name_value[0]) || !name_value[1])
 	{
 		free_str_arr(&name_value);
-		return ;
+		return (1);
 	}
 	env_var = malloc(sizeof(t_env));
 	if (!env_var)
-		return ;
+		return (1);
 	env_var->name = ft_strdup(name_value[0]);
 	if (!env_var->name)
-		return ;
+		return (1);
 	env_var->value = ft_strdup(name_value[1]);
 	if (!env_var->value)
-		return ;
+		return (1);
 	free_str_arr(&name_value);
 	env_var_node = ft_lstnew(env_var);
 	if (!env_var_node)
-		return ;
+		return (1);
 	ft_lstadd_back(&env, env_var_node);
+	return (0);
 }
 
-void free_and_relink(t_list *prev, t_list *current)
+void	free_and_relink(t_list *prev, t_list *current)
 {
+	t_env	*env_var;
+
 	prev->next = current->next;
-	t_env *env_var = (t_env *)current->content;
+	env_var = (t_env *)current->content;
 	free(env_var->name);
 	free(env_var->value);
 	free(current->content);
 	free(current);
 }
 
-void ft_unset(char **args, t_list *env)
+int	ft_unset(char **args, t_list *env)
 {
-	t_list *prev = NULL;
-	t_list *current = env;
+	t_list	*prev;
+	t_list	*current;
+	t_env	*env_var;
 
+	prev = NULL;
+	current = env;
 	while (current)
 	{
-		t_env *env_var = (t_env *)current->content;
-		if (strcmp(env_var->name, args[1]) == 0)
+		env_var = (t_env *)current->content;
+		if (strcmp(env_var->name, args[1]) == 0) // forbidden function
 		{
 			if (prev)
 				free_and_relink(prev, current);
 			else
 				env = current->next;
-			break;
+			break ;
 		}
 		prev = current;
 		current = current->next;
 	}
+	return (0);
 }
 
-void	print_env(t_list *env)
+int	print_env(t_list *env)
 {
 	t_list	*tmp;
 
@@ -163,13 +172,15 @@ void	print_env(t_list *env)
 			((t_env *)tmp->content)->value);
 		tmp = tmp->next;
 	}
+	return (0);
 }
 
 void	ft_exit(t_ms *shell)
 {
+	(void)shell;
 	ft_printf("exit\n");
 	free_cmd_list();
-	free_env(shell->env);
-	free(shell->last_exit_in_str);
+	free_env();
+	rl_clear_history();
 	exit(0);
 }
