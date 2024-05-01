@@ -22,7 +22,7 @@ void    single_cmd_exec(t_cmd *cmd)
 	{
 		handle_redir_in(cmd);
 		handle_redir_out(cmd);
-		exec_builtin(cmd);
+		get_ms()->last_exit = exec_builtin(cmd);
 		return ;
 	}
     pid = fork();
@@ -35,5 +35,28 @@ void    single_cmd_exec(t_cmd *cmd)
 		execute_child(cmd);
 	}
     waitpid(pid, &status, 0);
-	catch_last_status(&status);
+	// catch_last_status(&status);
+	if (WIFEXITED(status))
+		get_ms()->last_exit = WEXITSTATUS(status);
+	else if (WIFSIGNALED(status))
+		get_ms()->last_exit = WTERMSIG(status);
+}
+
+bool    is_builtin(char *cmd_name)
+{
+    if (!ft_strncmp(cmd_name, "echo", 5))
+        return (1);
+    if (!ft_strncmp(cmd_name, "cd", 3))
+        return (1);
+    if (!ft_strncmp(cmd_name, "pwd", 4))
+        return (1);
+    if (!ft_strncmp(cmd_name, "export", 7))
+        return (1);
+    if (!ft_strncmp(cmd_name, "unset", 6))
+        return (1);
+    if (!ft_strncmp(cmd_name, "env", 4))
+        return (1);
+    if (!ft_strncmp(cmd_name, "exit", 5))
+        return (1);
+    return (0);
 }

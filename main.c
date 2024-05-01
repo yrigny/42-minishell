@@ -12,7 +12,6 @@ int	main(int argc, char **argv, char **envp)
 	// g_signal = 0;
 	if (init_env(envp, ms) == 0)
 		return (EXIT_FAILURE);
-	// ms->curr_dir = getcwd(NULL, 0);
 	shell_routine();
 	free_env();
 	return (EXIT_SUCCESS);
@@ -27,11 +26,13 @@ int	main(int argc, char **argv, char **envp)
 // 6. (OK) try open each redir_out (create if not yet), trunc silent ones, set active one to fd_out
 // 7. (OK) error msg: command not found (manual), permission denied (perror), no such file or dir (perror)
 // 8. (OK) create independent heredoc for each cmd
-// 9. set exit status 2 (misused builtin), 128 (invalid argument to exit), and 128+n (fatal error signal)
+// 9. set exit status 2 (misused builtin), and 128+n (fatal error signal)
 // 10. add signals handler
-// 11. debug builtins (export segfult when no argument)
+// 11. (OK) export segfult when no argument
 // 12. (OK) clean tmp heredoc files after each line executed
 // 13. (OK) replace current prompt with customized prompt ("user:cwd$ ")
 // 14. (OK) fix bug with str replacement of "$?"
 // 15. (OK) free malloc'd thing in each child process
-// 16. norminette
+// 16. limit the use of '||' '&&' '(' ')' in syntax checker
+// 17. test and debug other builtins
+// 18. norminette

@@ -70,20 +70,20 @@ int		exec_builtin(t_cmd *child)
 	else if (!ft_strncmp(cmd_name, "env", 4))
 		exit_code = print_env(ms->env);
 	else if (!ft_strncmp(cmd_name, "exit", 5))
-        	ft_exit(ms);
+        	ft_exit();
 	return (exit_code);
 }
 
-void	catch_last_status(int *status)
-{
-	if (WIFEXITED(*status))
-	{
-		get_ms()->last_exit = WEXITSTATUS(*status);
-		// printf("Exit status of the child was %d\n", get_ms()->last_exit);
-	}
-	else if (WIFSIGNALED(*status))
-	{
-		get_ms()->last_exit = WTERMSIG(*status);
-		// printf("Exit status of the child was %d\n", get_ms()->last_exit);
-	}
-}
+// void	catch_last_status(int *status)
+// {
+// 	if (WIFEXITED(*status))
+// 	{
+// 		get_ms()->last_exit = WEXITSTATUS(*status);
+// 		// printf("Exit status of the child was %d\n", get_ms()->last_exit);
+// 	}
+// 	else if (WIFSIGNALED(*status))
+// 	{
+// 		get_ms()->last_exit = WTERMSIG(*status);
+// 		// printf("Exit status of the child was %d\n", get_ms()->last_exit);
+// 	}
+// }

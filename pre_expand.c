@@ -52,6 +52,8 @@ char    *match_env_var(char *name, int len)
             return ("126");
         if (last_exit == 127)
             return ("127");
+        if (last_exit == 130)
+            return ("130");
     }
     env = get_ms()->env;
     while (env && ft_strncmp(((t_env *)env->content)->name, name, len))

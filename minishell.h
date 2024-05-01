@@ -73,6 +73,7 @@ typedef struct s_ms
 /* main process */
 t_ms	*get_ms(void);
 bool	init_env(char **envp, t_ms *ms);
+int     add_env_var(char *str, t_list **env);
 void	shell_routine(void);
 void	free_env(void);
 int		empty_line(char *line);
@@ -123,6 +124,7 @@ void	free_tokens(t_token **tokens);
 /* execution */
 void	exec_manager(void);
 void    single_cmd_exec(t_cmd *cmd);
+bool    is_builtin(char *cmd_name);;
 void    pipex(t_ms *ms, t_list *cmds);
 void    fork_children(int nb_cmds, t_pipe pipe_arr[MAX_PIPE], t_list *cmds);
 void	child_first(t_cmd *child, int pipe[2]);
@@ -133,7 +135,7 @@ bool	cmd_is_executable(t_cmd *child);
 void	execute_child(t_cmd *child);
 int 	exec_builtin(t_cmd *child);
 void	child_free_exit(int exit_code);
-void	catch_last_status(int *status);
+// void	catch_last_status(int *status);
 
 /* pre-execution */
 void    handle_redirections(t_list *cmds);
@@ -145,7 +147,6 @@ void    handle_redir_out(t_cmd *cmd);
 /* helper */
 void    print_tokens(t_token *tokens);
 void    print_cmd_list(t_list *cmd_list);
-bool    is_builtin(char *cmd_name);
 
 /* builtins */
 int	    ft_echo(char **args);
@@ -153,11 +154,13 @@ void    edit_env_value(t_list *env, char *name, char *new_value);
 int	    ft_cd(char **args, t_list *env);
 int	    err(const char *msg, int ret);
 int	    ft_pwd(void);
-int     is_name_valid(const char *name);
 int 	ft_export(char **args, t_list *env);
+bool    has_valid_name(const char *name);
+void    add_or_edit_env_var(char *str, t_list **env_list);
+void	export_invalid_msg(char *arg);
 void    free_and_relink(t_list *prev, t_list *current);
 int     ft_unset(char **args, t_list *env);
 int 	print_env(t_list *env);
-void	ft_exit(t_ms *shell);
+void	ft_exit(void);
 
 #endif

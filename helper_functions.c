@@ -56,22 +56,3 @@ void    print_cmd_list(t_list *cmd_list)
         printf("----------------------\n");
     }
 }
-
-bool    is_builtin(char *cmd_name)
-{
-    if (!ft_strncmp(cmd_name, "echo", 5))
-        return (1);
-    if (!ft_strncmp(cmd_name, "cd", 3))
-        return (1);
-    if (!ft_strncmp(cmd_name, "pwd", 4))
-        return (1);
-    if (!ft_strncmp(cmd_name, "export", 7))
-        return (1);
-    if (!ft_strncmp(cmd_name, "unset", 6))
-        return (1);
-    if (!ft_strncmp(cmd_name, "env", 4))
-        return (1);
-    if (!ft_strncmp(cmd_name, "exit", 5))
-        return (1);
-    return (0);
-}

@@ -13,7 +13,8 @@ CFILES		= main.c minishell.c minishell_utils.c \
 			pre_expand.c pre_expand_utils.c \
 			exec_manager.c redir_manager.c \
 			pipex.c execution.c \
-			helper_functions.c builtins.c
+			helper_functions.c \
+			builtins.c builtin_export.c
 
 OFILES		= $(CFILES:.c=.o)
 

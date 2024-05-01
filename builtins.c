@@ -28,7 +28,7 @@ void	edit_env_value(t_list *env, char *name, char *new_value)
 	while (env)
 	{
 		env_var = (t_env *)env->content;
-		if (strcmp(env_var->name, name) == 0)
+		if (!ft_strncmp(env_var->name, name, ft_strlen(name) + 1))
 		{
 			free(env_var->value);
 			env_var->value = strdup(new_value);
@@ -40,26 +40,32 @@ void	edit_env_value(t_list *env, char *name, char *new_value)
 	}
 }
 
-int	ft_cd(char **args, t_list *env)
+int	cd_command(t_list *env, char *path)
 {
 	char	*old_pwd;
-
+	char	*pwd;
+	
 	old_pwd = getcwd(NULL, 0);
-	if (args[1] == NULL)
+	edit_env_value(env, "OLDPWD", old_pwd);
+	free(old_pwd);
+	if (chdir(path) != 0)
 	{
-		edit_env_value(env, "OLDPWD", old_pwd);
-		free(old_pwd);
-		if (chdir("/home") != 0)
-			perror("ft_cd");
+		perror("ft_cd");
+		return (1);
 	}
-	else
-	{
-		edit_env_value(env, "OLDPWD", old_pwd);
-		free(old_pwd);
-		if (chdir(args[1]) != 0)
-			perror("ft_cd");
-	}
+	pwd = getcwd(NULL, 0);
+	edit_env_value(env, "PWD", pwd);
+	free(pwd);
 	return (0);
+}
+
+int	ft_cd(char **args, t_list *env)
+{
+	if (args[1] == NULL)
+		return(cd_command(env, "/home"));
+	else
+		return(cd_command(env, args[1]));
+	return (1);
 }
 
 int	err(const char *msg, int ret)
@@ -78,49 +84,6 @@ int	ft_pwd(void)
 		return (err("Error getting current directory", 1));
 	ft_printf("%s\n", path);
 	free(path);
-	return (0);
-}
-
-int	is_name_valid(const char *name)
-{
-	if (!name)
-		return (0);
-	int(i) = 0;
-	while (name[i])
-	{
-		if (!ft_isalnum(name[i]))
-			return (0);
-		i++;
-	}
-	return (1);
-}
-
-int	ft_export(char **args, t_list *env)
-{
-	t_env	*env_var;
-	t_list	*env_var_node;
-	char	**name_value;
-
-	name_value = ft_split(args[1], '=');
-	if (!is_name_valid(name_value[0]) || !name_value[1])
-	{
-		free_str_arr(&name_value);
-		return (1);
-	}
-	env_var = malloc(sizeof(t_env));
-	if (!env_var)
-		return (1);
-	env_var->name = ft_strdup(name_value[0]);
-	if (!env_var->name)
-		return (1);
-	env_var->value = ft_strdup(name_value[1]);
-	if (!env_var->value)
-		return (1);
-	free_str_arr(&name_value);
-	env_var_node = ft_lstnew(env_var);
-	if (!env_var_node)
-		return (1);
-	ft_lstadd_back(&env, env_var_node);
 	return (0);
 }
 
@@ -147,13 +110,13 @@ int	ft_unset(char **args, t_list *env)
 	while (current)
 	{
 		env_var = (t_env *)current->content;
-		if (strcmp(env_var->name, args[1]) == 0) // forbidden function
+		if (ft_strncmp(env_var->name, args[1], ft_strlen(args[1]) + 1) == 0)
 		{
 			if (prev)
 				free_and_relink(prev, current);
 			else
 				env = current->next;
-			break ;
+			return (0);
 		}
 		prev = current;
 		current = current->next;
@@ -175,9 +138,8 @@ int	print_env(t_list *env)
 	return (0);
 }
 
-void	ft_exit(t_ms *shell)
+void	ft_exit(void)
 {
-	(void)shell;
 	ft_printf("exit\n");
 	free_cmd_list();
 	free_env();

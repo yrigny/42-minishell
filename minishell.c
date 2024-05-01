@@ -2,32 +2,40 @@
 
 bool	init_env(char **envp, t_ms *ms)
 {
-	t_env	*env_var;
-	t_list	*env_var_node;
-    int     i;
-	int		j;
+	int	i;
+	int	ret;
 
-    i = -1;
+	i = -1;
 	while (envp[++i])
 	{
-		j = 0;
-		while (envp[i][j] != '=')
-			j++;
-		env_var = malloc(sizeof(t_env));
-		if (!env_var)
-			return (0);
-		env_var->name = ft_substr(envp[i], 0, j);
-		if (!env_var->name)
-			return (0);
-		env_var->value = ft_strdup(&envp[i][j + 1]);
-		if (!env_var->value)
-			return (0);
-		env_var_node = ft_lstnew(env_var);
-		if (!env_var_node)
-			return (0);
-		ft_lstadd_back(&ms->env, env_var_node);
+		ret = !add_env_var(envp[i], &ms->env);
 	}
-	return (1);
+	return (ret);
+}
+
+int	add_env_var(char *str, t_list **env)
+{
+	int		i;
+	t_env	*env_var;
+	t_list	*env_node;
+
+	i = 0;
+	while (str[i] && str[i] != '=')
+		i++;
+	env_var = malloc(sizeof(t_env));
+	if (!env_var)
+		return (1);
+	env_var->name = ft_substr(str, 0, i);
+	if (!env_var->name)
+		return (1);
+	env_var->value = ft_strdup(&str[i + 1]);
+	if (!env_var->value)
+		return (1);
+	env_node = ft_lstnew(env_var);
+	if (!env_var)
+		return (1);
+	ft_lstadd_back(env, env_node);
+	return (0);
 }
 
 void	free_env(void)
@@ -69,7 +77,6 @@ void	shell_routine(void)
 		parse_token_into_cmds(tokens);
 		exec_manager();
 		free_cmd_list();
-		// clean_tmp_files();
 	}
 	rl_clear_history();
 }
