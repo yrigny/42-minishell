@@ -1,66 +1,70 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   pre_expand.c                                       :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: yrigny <marvin@42.fr>                      +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/15 15:47:04 by yrigny            #+#    #+#             */
-/*   Updated: 2024/04/15 15:47:06 by yrigny           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "minishell.h"
 
-void    pre_expand(t_list **cmd_arg, t_cmd *cmd)
+void    pre_expand(t_token *tokens)
 {
-    t_list  *str_node;
-    int     dollar_pos;
+    int dollar_pos;
 
-    str_node = *cmd_arg;
-    while (str_node)
+    while (tokens)
     {
         dollar_pos = 0;
-        while (has_expandable_dollar_str(str_node, &dollar_pos))
-            expand_env_var(&str_node, dollar_pos);
-        remove_quotes(&str_node, (char *)str_node->content);
-        str_node = str_node->next;
+        while (has_expandable_dollar_str(tokens, &dollar_pos))
+            expand_env_var(tokens, dollar_pos);
+        remove_quotes(tokens, tokens->value);
+        tokens = tokens->next;
     }
-    expand_cmd_path(cmd, (*cmd_arg)->content);
 }
 
-void    expand_env_var(t_list **cmd_arg, int head)
+void    expand_env_var(t_token *token, int head)
 {
     int     end;
     char    *old_str;
     char    *env_var_value;
     char    *new_str;
 
-    old_str = (char *)((*cmd_arg)->content);
+    old_str = token->value;
     end = head + 1;
-    while (ft_isalnum(old_str[end + 1]) || old_str[end + 1] == '_')
-        end++;
+    if (old_str[end] != '?')
+    {
+        while (ft_isalnum(old_str[end + 1]) || old_str[end + 1] == '_')
+            end++;
+    }
     env_var_value = match_env_var(&old_str[head + 1], end - head);
     // printf("env_var_value: [%s]\n", env_var_value);
     new_str = assemble_new_str(old_str, env_var_value, head, end);
     free(old_str);
     // printf("new str: %s\n", new_str);
-    (*cmd_arg)->content = new_str;
+    token->value = new_str;
 }
 
 char    *match_env_var(char *name, int len)
 {
     t_list  *env;
+    int     last_exit;
 
+    if (len == 1 && !ft_strncmp(name, "?", 2))
+    {
+        last_exit = get_ms()->last_exit;
+        if (last_exit == 0)
+            return ("0");
+        if (last_exit == 1)
+            return ("1");
+        if (last_exit == 126)
+            return ("126");
+        if (last_exit == 127)
+            return ("127");
+        if (last_exit == 130)
+            return ("130");
+    }
     env = get_ms()->env;
     while (env && ft_strncmp(((t_env *)env->content)->name, name, len))
         env = env->next;
-    if (!env || ft_strlen(((t_env *)env->content)->name) != (size_t)len)
+    if (!env)
         return ("");
     else
         return (((t_env *)env->content)->value);
 }
-void    remove_quotes(t_list **str_node, char *old_str)
+
+void    remove_quotes(t_token *token, char *old_str)
 {
     int     i;
     int     pair_of_quotes;
@@ -82,34 +86,23 @@ void    remove_quotes(t_list **str_node, char *old_str)
     }
     new_str = assemble_new_str2(old_str, pair_of_quotes);
     free(old_str);
-    (*str_node)->content = new_str;
+    token->value = new_str;
 }
 
-void    expand_cmd_path(t_cmd *cmd, char *executable)
+void    expand_fullpath(t_list *cmds)
 {
     char    **paths;
-    char    *tmp_cmd_path;
-    int     i;
+    t_cmd   *cmd;
 
-    if (access(executable, F_OK) == 0)
-    {
-        cmd->fullpath = ft_strdup(executable);
-        return ;
-    }
     paths = get_paths_array();
     if (!paths)
         return ;
-    i = -1;
-    while (!cmd->fullpath && executable && paths[++i])
+    while (cmds)
     {
-        tmp_cmd_path = ft_strjoin(paths[i], "/");
-        cmd->fullpath = ft_strjoin(tmp_cmd_path, executable);
-        if (access(cmd->fullpath, F_OK) != 0)
-        {
-            free(cmd->fullpath);
-            cmd->fullpath = NULL;
-        }
-        free(tmp_cmd_path);
+        cmd = (t_cmd *)cmds->content;
+        if (!is_builtin(cmd->cmd_arr[0]))
+            assemble_fullpath(cmd, cmd->cmd_arr[0], paths);
+        cmds = cmds->next;
     }
     free_str_arr(&paths);
 }

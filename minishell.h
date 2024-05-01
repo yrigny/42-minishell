@@ -20,15 +20,15 @@ typedef enum e_token_type
 {
     TOKEN_WORD,         // cmd and args
     TOKEN_PIPE,         // '|'
-    TOKEN_OR,           // '||'
-    TOKEN_AND,          // '&&'
-    TOKEN_PRT_L,        // '('
-    TOKEN_PRT_R,        // ')'
     TOKEN_REDIR_IN,     // '<'
     TOKEN_REDIR_HEREDOC,// '<<'
     TOKEN_REDIR_OUT,    // '>'
     TOKEN_REDIR_APPEND, // '>>'
     TOKEN_UNACCEPTED,   // '&' ';'
+    TOKEN_OR,           // '||'
+    TOKEN_AND,          // '&&'
+    TOKEN_PRT_L,        // '('
+    TOKEN_PRT_R,        // ')'
 }   t_token_type;
 
 typedef struct s_token

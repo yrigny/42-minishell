@@ -1,7 +1,5 @@
 #include "minishell.h"
 
-// int		g_signal;
-
 int	main(int argc, char **argv, char **envp)
 {
 	t_ms	*ms;
@@ -9,7 +7,6 @@ int	main(int argc, char **argv, char **envp)
 	(void)argc;
 	(void)argv;
 	ms = get_ms();
-	// g_signal = 0;
 	if (init_env(envp, ms) == 0)
 		return (EXIT_FAILURE);
 	shell_routine();
@@ -33,6 +30,6 @@ int	main(int argc, char **argv, char **envp)
 // 13. (OK) replace current prompt with customized prompt ("user:cwd$ ")
 // 14. (OK) fix bug with str replacement of "$?"
 // 15. (OK) free malloc'd thing in each child process
-// 16. limit the use of '||' '&&' '(' ')' in syntax checker
+// 16. (OK) limit the use of '||' '&&' '(' ')' in syntax checker
 // 17. test and debug other builtins
 // 18. norminette

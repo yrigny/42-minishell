@@ -1,52 +1,26 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   pre_expand_utils.c                                 :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: yrigny <marvin@42.fr>                      +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/17 15:07:08 by yrigny            #+#    #+#             */
-/*   Updated: 2024/04/17 15:07:10 by yrigny           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "minishell.h"
 
-bool    has_expandable_dollar_str(t_list *arg, int *dollar_pos)
+bool    has_expandable_dollar_str(t_token *token, int *dollar_pos)
 {
     char    *str;
     int     single_quote_open;
 
-    str = (char *)(arg->content);
+    str = token->value;
     single_quote_open = 0;
     while (*str)
     {
         if (*str == '\'')
             single_quote_open = (single_quote_open + 1) % 2;
         else if (!single_quote_open && *str == '$'
-                && (ft_isalnum(*(str + 1)) || *(str + 1) == '_'))
+                && ((ft_isalnum(*(str + 1)) || *(str + 1) == '_')
+                || *(str + 1) == '?'))
         {
-            *dollar_pos = str - (char *)arg->content;
+            *dollar_pos = str - token->value;
             return (1);
         }
         str++;
     }
     return (0);
-}
-
-char    **get_paths_array(void)
-{
-    t_list  *env;
-    char    **paths;
-
-    env = get_ms()->env;
-    while (env && ft_strncmp(((t_env *)env->content)->name, "PATH", 5))
-        env = env->next;
-    if (env && !ft_strncmp(((t_env *)env->content)->name, "PATH", 5))
-        paths = ft_split(((t_env *)env->content)->value, ':');
-    else
-        paths = NULL;
-    return (paths);
 }
 
 char    *assemble_new_str(char *old_str, char *value, int head, int end)
@@ -71,13 +45,6 @@ char    *assemble_new_str(char *old_str, char *value, int head, int end)
     return (new_str);
 }
 
-// go through the str, when meeting a quote:
-// save the quote char (' or "), 
-// continue going through the str, looking for the quote char
-// when meeting the end quote, save "number of pair of quote" + 1
-// loop until the str terminator \0
-// malloc a new str with len = old_str_len - number of pair of quote * 2
-// assemble the new str without quotes
 char    *assemble_new_str2(char *old_str, int pair_of_quotes)
 {
     int     new_str_len;
@@ -104,4 +71,43 @@ char    *assemble_new_str2(char *old_str, int pair_of_quotes)
     }
     new_str[i] = '\0';
     return (new_str);
+}
+
+char    **get_paths_array(void)
+{
+    t_list  *env;
+    char    **paths;
+
+    env = get_ms()->env;
+    while (env && ft_strncmp(((t_env *)env->content)->name, "PATH", 5))
+        env = env->next;
+    if (env && !ft_strncmp(((t_env *)env->content)->name, "PATH", 5))
+        paths = ft_split(((t_env *)env->content)->value, ':');
+    else
+        paths = NULL;
+    return (paths);
+}
+
+void    assemble_fullpath(t_cmd *cmd, char *cmd_name, char **paths)
+{
+    char    *tmp_cmd_path;
+    int     i;
+
+    if (access(cmd_name, F_OK) == 0)
+    {
+        cmd->fullpath = ft_strdup(cmd_name);
+        return ;
+    }
+    i = -1;
+    while (!cmd->fullpath && cmd_name && paths[++i])
+    {
+        tmp_cmd_path = ft_strjoin(paths[i], "/");
+        cmd->fullpath = ft_strjoin(tmp_cmd_path, cmd_name);
+        if (access(cmd->fullpath, F_OK) != 0)
+        {
+            free(cmd->fullpath);
+            cmd->fullpath = NULL;
+        }
+        free(tmp_cmd_path);
+    }
 }

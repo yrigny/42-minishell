@@ -31,16 +31,8 @@ char	*trim_line(char *str)
 
 t_token_type    get_token_type(char *s)
 {
-    if (*s == '|' && *(s + 1) == '|')
-        return (TOKEN_OR);
-    else if (*s == '|' && *(s + 1) != '|')
+    if (*s == '|' && *(s + 1) != '|')
         return (TOKEN_PIPE);
-    else if (*s == '&' && *(s + 1) == '&')
-        return (TOKEN_AND);
-    else if (*s == '(')
-        return (TOKEN_PRT_L);
-    else if (*s == ')')
-        return (TOKEN_PRT_R);
     else if (*s == '<' && *(s + 1) == '<')
         return (TOKEN_REDIR_HEREDOC);
     else if (*s == '<' && *(s + 1) != '<')
@@ -53,6 +45,14 @@ t_token_type    get_token_type(char *s)
         return (TOKEN_UNACCEPTED);
     else if (*s == ';')
         return (TOKEN_UNACCEPTED);
+    else if (*s == '|' && *(s + 1) == '|')
+        return (TOKEN_OR);
+    else if (*s == '&' && *(s + 1) == '&')
+        return (TOKEN_AND);
+    else if (*s == '(')
+        return (TOKEN_PRT_L);
+    else if (*s == ')')
+        return (TOKEN_PRT_R);
     else
         return (TOKEN_WORD);
 }

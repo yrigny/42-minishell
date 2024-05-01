@@ -1,32 +1,16 @@
 #include "minishell.h"
-/*
-TOKEN_WORD,         // check unclosed quote
-TOKEN_PIPE,         // '|' must not be the 1st token or followed by ')' '|' '||' '&&'
-TOKEN_OR,           // '||' must not be the 1st token or followed by ')' '|' '||' '&&'
-TOKEN_AND,          // '&&' must not be the 1st token or followed by ')' '|' '||' '&&'
-TOKEN_PRT_L,        // '(' must not be single, or followed by ')' '|' '||' '&&'
-TOKEN_PRT_R,        // ')' must not be single, or followed by word token or '('
-TOKEN_REDIR_IN,     // '<' must be followed by word token
-TOKEN_REDIR_HEREDOC,// '<<' idem
-TOKEN_REDIR_OUT,    // '>' idem
-TOKEN_REDIR_APPEND, // '>>' idem
-TOKEN_UNACCEPTED,   // '&' ';' should be rejected
-*/
 
 bool    syntax_error(t_token *tokens)
 {
     int open_prt;
 
     open_prt = 0;
-    if (tokens->type >= TOKEN_PIPE && tokens->type <= TOKEN_AND)
+    if (tokens->type == TOKEN_PIPE)
         return (syntax_error_msg(tokens->value));
     while (tokens)
     {
-        if (tokens->type == TOKEN_UNACCEPTED)
+        if (tokens->type >= TOKEN_UNACCEPTED)
             return (syntax_error_msg(tokens->value));
-        if ((tokens->type == TOKEN_PRT_L || tokens->type == TOKEN_PRT_R)
-                && !update_parenthesis(tokens->type, &open_prt))
-            return (1);
         if (tokens->type == TOKEN_WORD && has_unclosed_quote(tokens->value))
             return (1);
         if (wrong_next_token_type(tokens, tokens->next))
@@ -88,16 +72,11 @@ bool    has_unclosed_quote(char *str)
 
 bool    wrong_next_token_type(t_token *curr, t_token *next)
 {
-    if (!next && !(curr->type == TOKEN_WORD || curr->type == TOKEN_PRT_R))
+    if (!next && !(curr->type == TOKEN_WORD))
         return (syntax_error_msg("newline"));
-    if (!next && (curr->type == TOKEN_WORD || curr->type == TOKEN_PRT_R))
+    if (!next && curr->type == TOKEN_WORD)
         return (0);
-    if ((curr->type >= TOKEN_PIPE && curr->type <= TOKEN_PRT_L)
-            && ((next->type >= TOKEN_PIPE && next->type <= TOKEN_AND)
-            || next->type == TOKEN_PRT_R))
-        return (syntax_error_msg(next->value));
-    if (curr->type == TOKEN_PRT_R 
-            && (next->type == TOKEN_PRT_L || next->type == TOKEN_WORD))
+    if (curr->type == TOKEN_PIPE && next->type == TOKEN_PIPE)
         return (syntax_error_msg(next->value));
     if (curr->type >= TOKEN_REDIR_IN && curr->type <= TOKEN_REDIR_APPEND
             && next->type != TOKEN_WORD)
