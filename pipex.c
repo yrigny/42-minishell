@@ -27,6 +27,33 @@ void	pipex(t_ms *ms, t_list *cmds)
 		get_ms()->last_exit = WTERMSIG(status);
 }
 
+void	close_unrelated_fds(int i, int nb_pipes, t_pipe pipe_arr[MAX_PIPE])
+{
+	int	first_pipe_idx;
+	int	last_pipe_idx;
+
+	first_pipe_idx = 0;
+	last_pipe_idx = nb_pipes - 1;
+	// close all unrelated fds to the left, until the first pipe
+	int x = i - 2;
+	while (x >= first_pipe_idx)
+	{
+		printf("for cmd[%d], closing pipe[%d]\n", i, x);
+		close(pipe_arr[x].fd[0]);
+		close(pipe_arr[x].fd[1]);
+		x--;
+	}
+	// close all unrelated fds to the right, until the last pipe
+	int y = i + 1;
+	while (y <= last_pipe_idx)
+	{
+		printf("for cmd[%d], closing pipe[%d]\n", i, y);
+		close(pipe_arr[y].fd[0]);
+		close(pipe_arr[y].fd[1]);
+		y++;
+	}
+}
+
 void	fork_children(int nb_cmds, t_pipe pipe_arr[MAX_PIPE], t_list *cmds)
 {
 	int	i;

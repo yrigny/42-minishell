@@ -9,6 +9,7 @@ int	main(int argc, char **argv, char **envp)
 	ms = get_ms();
 	if (init_env(envp, ms) == 0)
 		return (EXIT_FAILURE);
+	setup_signals();
 	shell_routine();
 	free_env();
 	return (EXIT_SUCCESS);
@@ -23,7 +24,7 @@ int	main(int argc, char **argv, char **envp)
 // 6. (OK) try open each redir_out (create if not yet), trunc silent ones, set active one to fd_out
 // 7. (OK) error msg: command not found (manual), permission denied (perror), no such file or dir (perror)
 // 8. (OK) create independent heredoc for each cmd
-// 9. set exit status 2 (misused builtin), and 128+n (fatal error signal)
+// 9. set exit status 2 (misused builtin), and 130 (SIGINT)
 // 10. add signals handler
 // 11. (OK) export segfult when no argument
 // 12. (OK) clean tmp heredoc files after each line executed

@@ -41,19 +41,20 @@ char    *match_env_var(char *name, int len)
     t_list  *env;
     int     last_exit;
 
-    if (len == 1 && !ft_strncmp(name, "?", 2))
+    if (len == 1 && *name == '?')
     {
         last_exit = get_ms()->last_exit;
-        if (last_exit == 0)
-            return ("0");
-        if (last_exit == 1)
-            return ("1");
-        if (last_exit == 126)
-            return ("126");
-        if (last_exit == 127)
-            return ("127");
-        if (last_exit == 130)
-            return ("130");
+		if (last_exit == 1)
+			return ("1");
+		if (last_exit == 2)
+			return ("2");
+		if (last_exit == 126)
+			return ("126");
+		if (last_exit == 127)
+			return ("127");
+		if (last_exit == 130)
+			return ("130");
+		return ("0");
     }
     env = get_ms()->env;
     while (env && ft_strncmp(((t_env *)env->content)->name, name, len))

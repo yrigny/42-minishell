@@ -78,6 +78,10 @@ void	shell_routine(void);
 void	free_env(void);
 int		empty_line(char *line);
 
+/* signal handling */
+void	setup_signals(void);
+void	sigint_handler(int sig);
+
 /* tokenization */
 t_token *tokenize_and_check_syntax(char *line);
 char	*trim_line(char *str);
@@ -135,7 +139,6 @@ bool	cmd_is_executable(t_cmd *child);
 void	execute_child(t_cmd *child);
 int 	exec_builtin(t_cmd *child);
 void	child_free_exit(int exit_code);
-// void	catch_last_status(int *status);
 
 /* pre-execution */
 void    handle_redirections(t_list *cmds);

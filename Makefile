@@ -14,19 +14,19 @@ CFILES		= main.c minishell.c minishell_utils.c \
 			exec_manager.c redir_manager.c \
 			pipex.c execution.c \
 			helper_functions.c \
-			builtins.c builtin_export.c
+			builtins.c builtin_export.c \
+			signals_handling.c
 
 OFILES		= $(CFILES:.c=.o)
 
 NAME		= minishell
-
-GNL			= 0
 
 GREEN=\033[0;32m
 YELLOW=\033[0;33m
 BLUE=\033[0;34m
 MAGENTA=\033[0;35m
 NC=\033[0m
+GNL=0
 
 all: $(NAME)
 

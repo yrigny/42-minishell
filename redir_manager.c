@@ -36,7 +36,6 @@ void    handle_redir_in(t_cmd *cmd)
         {
             ft_putstr_fd("minishell: ", 2);
             perror(src->value);
-            exit(1);
         }
         src = src->next;
     }
@@ -103,7 +102,6 @@ void    handle_redir_out(t_cmd *cmd)
         {
             ft_putstr_fd("minishell: ", 2);
             perror(dst->value);
-            exit(1);
         }
         dst = dst->next;
     }
